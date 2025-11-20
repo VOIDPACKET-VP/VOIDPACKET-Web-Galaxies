@@ -1,40 +1,40 @@
-# 🌌 VOIDPACKET Web Galaxies
+# VOIDPACKET Web Galaxies
 
 > *"Mapping the uncharted territories of web security - one galaxy at a time"*
 
-## 🚀 About This Universe
+## About This Universe
 
 Welcome to **VOIDPACKET Web Galaxies**, a cosmic collection of web vulnerability research and security documentation. Each galaxy in this repository represents a specific vulnerability domain explored through systematic research and hands-on testing.
 
-## 🪐 Galactic Structure
+## Galactic Structure
 
-### 🌠 **Template Injection Galaxy**
+### **Template Injection Galaxy**
 - Server-Side Template Injection (SSTI) across multiple engines
 - Template engine identification methodologies
 - Exploitation chains and bypass techniques
 - Defense and mitigation strategies
 
-### 🔐 **Authentication Galaxy**
+### **Authentication Galaxy**
 - JSON Web Token (JWT) security research
 - Session management vulnerabilities
 - Authentication bypass techniques
 - Token manipulation and validation flaws
 
-### 🌐 **Web Application Galaxy**
+### **Web Application Galaxy**
 - Core OWASP Top 10 vulnerability research
 - Business logic flaw documentation
 - Input validation bypass techniques
 - API security testing methodologies
 
-## 📡 Galactic Exploration Framework
+## Galactic Exploration Framework
 
 Each galaxy contains:
-- **📚 Research Documentation** - Comprehensive vulnerability analysis
-- **⚡ Exploitation Guides** - Systematic testing methodologies
-- **🛡️ Defense Constellations** - Mitigation strategies and secure coding practices
-- **🎯 Case Study Nebulae** - Practical application examples
+- **Research Documentation** - Comprehensive vulnerability analysis
+- **Exploitation Guides** - Systematic testing methodologies
+- **Defense Constellations** - Mitigation strategies and secure coding practices
+- **Case Study Nebulae** - Practical application examples
 
-## 🎯 Mission Objectives
+## Mission Objectives
 
 This repository serves as:
 - A **structured knowledge base** for web application security
@@ -42,7 +42,7 @@ This repository serves as:
 - A **learning resource** for security practitioners
 - A **methodology archive** for penetration testing
 
-## 🌟 Coming Soon Galaxies
+## Coming Soon Galaxies
 
 - **SSRF Solar System** - Server-Side Request Forgery research
 - **XSS Constellation** - Cross-Site Scripting advanced techniques
@@ -51,6 +51,6 @@ This repository serves as:
 
 ---
 
-**🌌 "Each galaxy represents a conquered vulnerability domain, mapped and documented for future explorers in the vast universe of web security."**
+**"Each galaxy represents a conquered vulnerability domain, mapped and documented for future explorers in the vast universe of web security."**
 
 *— VOIDPACKET Security Research*
