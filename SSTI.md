@@ -17,12 +17,12 @@
 ## Template Engines 
 **Template Engines** are fundamental components in web development that dynamically generate HTML content by merging static template files with variable data. They allow developers to write template files, typically HTML documents interspersed with special placeholders and logic statements (the template syntax). The engine processes these templates, replacing the placeholders with actual user or application data to produce the final webpage sent to the client. This separates the presentation layer (the template) from the business logic and data.
 
-Crucially for security, these engines are built on top of specific programming languages (e.g., Jinja2 on Python, Twig on PHP, Freemarker on Java), and each has its own unique syntax for variables, control structures, and sometimes even direct code execution. This diversity is precisely why the first step in exploiting an SSTI vulnerability is engine identification. An attacker must first deduce the underlying language family from the server's behavior and then pinpoint the exact engine by testing its unique syntax, as a payload designed for one engine will fail against another.
+Crucially for security, these engines are built on top of specific programming languages (e.g., Jinja2 on Python, Twig on PHP, Freemarker on Java), and each has its own unique syntax for variables, control structures, and sometimes even direct code execution. This diversity is precisely why the first step in exploiting an SSTI vulnerability is engine identification. An attacker must first deduce the underlying language family from the server's behavior and then pinpoint the exact engine by testing its unique syntax, as a payload designed for one engine will mostly fail against another.
 
 ## Template Engine Identification
-**Template Engine Identification** is a systematic, two-stage process crucial for exploiting SSTI vulnerabilities. The first stage, Detection, involves probing all available input vectors—such as URL parameters, form fields, and HTTP headers by injecting basic template syntax from various engines. The goal is to provoke an anomalous response from the server, which indicates that our input is being processed by a template engine. This can be achieved by intentionally causing syntax errors (e.g., using unmatched brackets like {}$<%) or executing simple operations (like {{ 7*7 }}), and then meticulously analyzing the application's output, headers, and even error messages for signs of server-side evaluation.
+**Template Engine Identification** is a systematic, two-stage process crucial for exploiting SSTI vulnerabilities. The first stage, ***Detection***, involves probing all available input vectors—such as URL parameters, form fields, and HTTP headers by injecting basic template syntax from various engines. The goal is to provoke an anomalous response from the server, which indicates that our input is being processed by a template engine. This can be achieved by intentionally causing syntax errors (e.g., using unmatched brackets like {}$<%) or executing simple operations (like {{ 7*7 }}), and then meticulously analyzing the application's output, headers, and even error messages for signs of server-side evaluation.
 
-Once an injection point is confirmed, the second stage, Fingerprinting, begins. This involves sending a series of engine-specific payloads designed to trigger unique behaviors. For instance, we test mathematical expressions (${7*7}, {{7*7}}, <%= 7*7 %>), object exposure probes (like {{config}} in Jinja2), or built-in variable references. By observing which payloads are executed successfully and comparing the output format and error messages, we can triangulate the specific template engine in use. While automated tools can assist in this process, a manual approach is often more reliable for dealing with custom or poorly documented engines, making this a critical skill for successful exploitation.
+Once an injection point is confirmed, the second stage, ***Fingerprinting***, begins. This involves sending a series of engine-specific payloads designed to trigger unique behaviors. For instance, we test mathematical expressions (${7*7}, {{7*7}}, <%= 7*7 %>), object exposure probes (like {{config}} in Jinja2), or built-in variable references. By observing which payloads are executed successfully and comparing the output format and error messages, we can triangulate the specific template engine in use. While automated tools can assist in this process, a manual approach is often more reliable for dealing with custom or poorly documented engines, making this a critical skill for successful exploitation.
 
 ## Exploitation by Engine Type
 ### Python-based Templates
@@ -93,7 +93,6 @@ Once an injection point is confirmed, the second stage, Fingerprinting, begins. 
         Syntax: {{ }}
         Detection: Limited execution context
         Exploitation:
-            javascript
             {{#with "s" as |string|}}
             {{#with "e"}}
                 {{#with split as |conslist|}}
@@ -114,7 +113,7 @@ Once an injection point is confirmed, the second stage, Fingerprinting, begins. 
             {{/with}}
             {{/with}}
 
-    The techniques discussed in this guide are foundational. The security community maintains extensive, ever-evolving repositories of payloads and bypass techniques. For a comprehensive and up-to-date collection, I highly encourage you to consult the PayloadsAllTheThings project on GitHub : ```https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection```
+    The techniques discussed in this guide are foundational. The security community maintains large, constantly updating repositories of payloads and bypass techniques. For a comprehensive and up-to-date collection, I highly encourage you to consult the **PayloadsAllTheThings** project on GitHub : ```https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection```
 
 ## Advanced Attack Vectors
     
