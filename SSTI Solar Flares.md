@@ -1,4 +1,4 @@
-# SSTI (Server-Side Template Injection) - Complete Security Guide
+# SSTI (Server-Side Template Injection)
 
 # Table of Contents
 - So what's SSTI ?
