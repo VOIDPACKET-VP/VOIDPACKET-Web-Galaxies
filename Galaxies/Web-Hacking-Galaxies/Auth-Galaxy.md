@@ -7,9 +7,9 @@
 # Authentication 
 ## Brute Forcing 
 - Authentication can be bypassed using brute forcing.
-- Sometimes our requests can get throttled, so we might wanna use different headers that trick the server into thinking that we are a different user, the headers can be :
+- Sometimes our requests can get throttled, so we might wanna use different headers that trick the server into thinking that we are a different user, one of those headers is :
 	1. X-Forwarded-For
-	There are different ways to go around this :
+- There are different ways to go around this :
 	2. Sometimes the lock out gets counted per username : so we can use few usernames but with a lot of passwords and start the fuzzing
 
 - Whenever we have multistep login (e.g. MFA, 2FA ...) we start thinking on what edge cases there could be :
