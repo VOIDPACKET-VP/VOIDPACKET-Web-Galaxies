@@ -1,4 +1,4 @@
-# SSTI (Server-Side Template Injection) - Complete Security Guide
+# SSTI (Server-Side Template Injection)
 
 # Table of Contents
 - So what's SSTI ?
@@ -132,7 +132,7 @@ The techniques discussed in this guide are foundational. The security community 
 4. ***Container Isolation***: Deploy template processors in locked-down Docker containers to contain potential breaches
 
 ## Resources
-- Intigriti artcile on SSTI : ```https://www.intigriti.com/researchers/blog/hacking-tools/exploiting-server-side-template-injection-ssti#exploiting-advanced-ssti-vulnerabilities```
+- Intigriti artcile on SSTI : ```https://www.intigriti.com/researchers/blog/hacking-tools/exploiting-server-side-template-injection-ssti```
 - PortSwigger article on SSTI : ```https://portswigger.net/web-security/server-side-template-injection```
 
 ## Conclusion
