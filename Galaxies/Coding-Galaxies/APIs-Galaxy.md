@@ -28,7 +28,7 @@
 - `async` goes before the function which enables us to use `await` , which goes anywhere before a method/function that returns a PROMISE.
 
 	`async` function handleClick() {
-	    const response = `await` fetch("https://apis.scrimba.com/deckofcards/api/deck/new/shuffle/")
+	    const response = `await` fetch("<URL>")
 	    const data = `await` res.json()
 	    remainingText.textContent = 'Remaining cards: ${data.remaining}'
 	    deckId = data.deck_id
