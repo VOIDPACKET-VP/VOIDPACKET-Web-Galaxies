@@ -10,13 +10,13 @@ This repository is organized by **scale of understanding**. Start with the cosmi
 VOIDPACKET-WEB-GALAXIES/
 
     ├── 🌌 GALAXIES/ # TIER 1: The Cosmic Laws
-    │ ├── 01-The-Injection-Galaxy/ # Law: "Untrusted data in a trusted interpreter."
-    │ ├── 02-The-Authentication-Galaxy/ # Law: "Proving and maintaining identity."
+    │ ├── 01-Injection-Galaxy/ # Law: "Untrusted data in a trusted interpreter."
+    │ ├── 02-Auth-Galaxy/ # Law: "Proving and maintaining identity."
     │ └── ... # Core security concepts as foundational forces.
     │
     └── ☄️ COSMIC-PHENOMENA/ # TIER 2: The Observable Exploits
-    ├── 01-SSTI-Solar-Flares/ # A violent eruption in a template engine.
-    ├── 02-SQLi-Black-Holes/ # A gravitational well that warps data queries.
+    ├── 01-SSTI Solar Flares/ # A violent eruption in a template engine.
+    ├── 02-JWT Meteor Showers/ # A gravitational well that warps data queries.
     └── ... # Specific vulnerabilities, born from their Galaxy's law.
 
 ### 🌌 **Galaxies (The Cosmic Laws)**
@@ -31,7 +31,7 @@ A **Cosmic Phenomenon** is a specific, exploitable vulnerability—a manifestati
 
 ## 🎯 Mission & Philosophy
 
-> *"Our goal is not just to catalog stars, but to understand gravity."*
+> *"My goal is not just to catalog stars, but to understand gravity."*
 
 This project serves as:
 - **A Structured Mind:** Organizing security knowledge from first principles.
@@ -40,7 +40,7 @@ This project serves as:
 - **A Builder's Guide:** Bridging the gap between breaking and building via the **Coding Galaxy**.
 
 ## 📡 Comm-Channel & Contributions
-This universe is actively mapped as part of my journey from researcher to security engineer. Insights are drawn from platforms like **BugForge, Intigriti, and HackTheBox**, and applied to projects like **VOIDLOCK**.
+This universe is actively mapped as part of my journey from researcher to security engineer. Insights are drawn from platforms like **BugForge, Intigriti, picoCTF and 247CTF**, and applied to projects like **VOIDLOCK, Lab builds**.
 
 *For fellow explorers: This structure is a proposal for how to think about security. If it resonates, feel free to adapt its laws for your own cosmos.*
 
@@ -52,7 +52,7 @@ This map of the web security universe is an ongoing project. If you have suggest
 - **Fork the Repository** and submit a Pull Request with your additions.
 - **Contact Me Directly:** You can find my contact information and other projects on my [personal website](https://voidpacket-vp.github.io) or in my GitHub bio.
 
-I welcome all forms of collaboration—from a single payload to an entire new Galactic theory.
+I welcome all forms of collaborations : from a single payload to an entire new Galactic theory.
 
 ---
 
