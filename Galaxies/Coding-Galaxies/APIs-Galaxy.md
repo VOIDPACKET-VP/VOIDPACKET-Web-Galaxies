@@ -21,7 +21,7 @@
 - We use the `.catch` method for the *rejected case*, it goes after the the `.then` methods.
 - It's syntax is similar to the `.then` : `.catch(err => {function-goes-here})`
 - Devs will usually add a way to report the error to some kind of service so that they can fix it etc.
-- Sometimes we can get a `404` but we don't get an error since `fetch` take it as a response, to overcome that we can use the `throw Error()` method, which will throw an error and will skip to the `.catch`
+- Sometimes we can get a `404` but we don't get an error since `fetch` take it as a response, to overcome that we can use the `throw Error()` method with `!response.ok` as a condition in the `if statement` , which will throw an error and will skip to the `.catch`
 # async and await 
 
 - There whole purpose is to make asynchronous code appear synchronous .
