@@ -47,3 +47,66 @@
 	} finally {
 	
 	}
+
+# CallBack Hell
+So instead of having a lot of functions where each one has a callback function, we can use Promises to ease that process up :
+	Example :
+	function uploadFile() {
+		return new Promise((resolve, reject) => {
+			console.log('Step 1: Uploading file...')
+			 setTimeout(() => {
+			          resolve() // Call the next step after 1 second
+			       }, 1000)
+			   })
+	}
+	function processFile() {
+	    return new Promise((resolve, reject) => {
+	        console.log('Step 2: Processing file...')
+	        setTimeout(() => {
+	            resolve() // Call the next step after 1 second
+	        }, 1000)
+	    })
+	}
+	function notifyUser() {
+	    return new Promise((resolve, reject) => {
+	        console.log('Step 3: Notifying user...')
+	        setTimeout(() => {
+	            resolve() // Call the next step after 1 second
+	        }, 1000)
+	    })
+	} 
+
+	try {
+	    await uploadFile()
+	    await processFile()
+	    await notifyUser()
+	    console.log('All steps completed!')
+	} catch(err) {
+	    console.log(err)
+	}
+
+# Promise.all
+
+It's used when we want to execute multiple promises concurrently, so the result is either they all resolve or the catch block gets triggered.
+	Example :
+		function createPromise() {
+		    return new Promise((resolve, reject) => {
+		        const success = Math.random() > 0.5
+		        if (success) {
+		            resolve("Operation successful!")
+		        } else {
+		            reject("Operation failed.")
+		        }
+		    })
+		}
+		
+		try {
+		    const promise1 = createPromise()
+		    const promise2 = createPromise()
+		    const promise3 = createPromise()
+		    const result = await Promise.all([promise1, promise2, promise3])
+		    console.log(result)
+		} catch(err) {
+		    console.log(err)
+		}
+- Also the OUTPUT of the Promise.all is an ARRAY, so remember that.
