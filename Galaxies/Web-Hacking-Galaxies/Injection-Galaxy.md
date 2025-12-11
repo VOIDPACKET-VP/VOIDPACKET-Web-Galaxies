@@ -61,3 +61,19 @@ But here we don't want to use strings that we provide, we want strings provided 
 	3. `' and substr((select version()), 1, 1) = "8"#`
 	4. `' and substr((select password from injection0x02 where username = 'admin'), 1, 1) = 'a'#`
 - Remember that sometimes when comparing `Upper case letters` with `Lower Case Letters` can still return `true` .  
+## SECOND ORDER SQLi
+- The theory behind it is that you deliver your payload, but it only executes later, e.g. : 
+	- Creating an account : username and password, but inject it with SQL payload, which will be stored in the DB and we can execute it later.
+- `sqlmap` has an option for **Second Order SQL Testing** 
+
+# Cross-Site Scripting (XSS)
+- It's a vulnerability that let's us executes JavaScript code in a victim's browser, and often gives us control over the app for that user
+## Types :
+1. ***Reflected*** > When the script we're injecting comes from the current HTTP request : `our script is included in the request` 
+	- It's limiting since we can only target ourselves
+2. ***Stored*** > When the payload is stored in the DB or something and then we can retrieve it later.
+3. ***DOM-Based*** > When the client-side has some vulnerable JavaScript that uses untrusted input  instead of having a vulnerability serve-side
+	- Everything happens locally in the browser.
+
+## Testing 
+- It's better to not use `alert()` as it often gets filtered, instead use : `print()` > which will pop up a print box. or `prompt()` > which will pop up a prompt box  

@@ -110,3 +110,28 @@ It's used when we want to execute multiple promises concurrently, so the result 
 		    console.log(err)
 		}
 - Also the OUTPUT of the Promise.all is an ARRAY, so remember that.
+
+- APIs would usually gives us back data as JSON, so when we get them we have to transfrom them to strings, we do that by using : `JSON.stringify()` method.
+
+- To call an `async` function and get its returned value, you must use the `await` keyword within an `async` context (another `async` function) :
+
+	`// 1. Define the async function
+	async function fetchData() {
+	  // Simulate an asynchronous operation (e.g., fetching data from an API)
+	  return new Promise(resolve => {
+	    setTimeout(() => {
+	      resolve("The awaited value has arrived!")
+	    }, 1000) // Resolves after 1 second
+	  })
+	}
+	// 2. Define an async context (an Immediately Invoked Function Expression - IIFE works well)
+	(async () => {
+	  try {
+	    // 3. Call the async function and await its result
+	    const result = await fetchData()
+	    // 4. Use the value once the Promise resolves
+	    console.log(result) // Output: The awaited value has arrived!
+	  } catch (error) {
+	    console.error("An error occurred:", error)
+	  }
+	})()`

@@ -19,7 +19,11 @@
 
 - We mainly we'll be using the `.createServer()` method from the HTTP Module, and it goes like this :
 	1. it takes a callBack function, which takes 2 params : `request` and `response`
-	2. The `response`  param exposes various methods to us, one of them is the `.end()` : which sends data over HTTP and then ends the response
+	2. The `response`  param exposes various methods to us, one of them is the `.end()` : which sends data over HTTP and then ends the response, it takes 3 params :
+		   1. The data
+		   2. An encoding type : the default is `utf8` 
+		   3. A callback function
+		Another method is the `.write()`, the difference between the `.write and .end` is that the `.end` also ends the request.
 	- So to create a server we would do something like this :
 		`import http from 'node:http'`
 		`const PORT = 8000`   ***// We need to set up a PORT to listen to***
