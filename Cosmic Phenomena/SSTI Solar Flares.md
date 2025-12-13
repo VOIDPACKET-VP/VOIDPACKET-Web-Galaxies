@@ -1,11 +1,11 @@
 # SSTI (Server-Side Template Injection)
 
 # Table of Contents
-- [So what's SSTI ?](##So what's SSTI ?)
-- [Template Engines](##Template Engines)
-- [Template Engine Identification](##Template Engine Identification)
-- [Exploitation by Engine Type](##Exploitation by Engine Type)
-- [Defense and Mitigation](##Defense and Mitigation)
+- [So what's SSTI ?](#So what's SSTI ?)
+- [Template Engines](#Template Engines)
+- [Template Engine Identification](#Template Engine Identification)
+- [Exploitation by Engine Type](#Exploitation by Engine Type)
+- [Defense and Mitigation](#Defense and Mitigation)
 - [Resources](##Resources)
 - [Conclusion](##Conclusion)
 
