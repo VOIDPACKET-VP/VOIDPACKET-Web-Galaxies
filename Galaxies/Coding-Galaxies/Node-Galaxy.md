@@ -1,5 +1,5 @@
 - Node.js is not a language, it's an environment where we can write JavaScript
-
+# Project : REST API
 ## Package.json
 - It's a `.json` file that exists at the heart of every node.js project.
 - It acts as the projects blueprint :
@@ -32,3 +32,33 @@
 		`})`
 		`server.listen(PORT, () => console.log(``server running on port: ${PORT}``))`  ***// and here is where we listen***
 
+
+## Content-Type
+- When sending data, specifying content type is very important.
+### Types :
+1. application/json
+2. text/html
+3. text/css
+4. application/xml
+5. etc.
+
+- To set the content type in the backend, we use the `setHeader()`  method on the `response` object , and we pass into it 2 strings : `"Content-Type"` and `"applicatioon/json"` 
+	- It will look something like this : `response.setHeader("Content-Type", "application/json")`
+
+- When sending data, we need to specify the status Code as well, we do that using the `statusCode` property on the `response` object : > `response.statusCode = 200`
+
+## Query parameters
+- It's what we add after the `url` and we initialize it with `?` then between each *key-value pair* we separate them with `&` : `/api?name=voidpacket&country=morocco` 
+- To construct them :
+	1. we make a new URL constructor (it takes 2 params : relative URL and base URL) which returns a URL object > `const urlObj = new URL(req.url, 'http://${req.headers.host}')` 
+
+	2. the `urlObj` now returns an object that has a key `searchParams` where it's value is : `{ 'name' => 'voidpacket', 'country' => 'morocco' }` , now this is not an object, so we have to make it an object, we do that using the `Object` class with the `fromEntries()` method : `const queryObj = Object.fromEntries(urlObj.searchParams)` 
+- We can use `urlObj.pathname` instead of `req.url` when we want to get the ***path stripped from the query params***
+## CORS
+- So by default browser use : **Same-origin policy** > requests can only be made to the same `protocol` ,`domain` and `port` as the one serving the web page. (BTW, this is happening by default)
+- But sometimes, things can get a bit complex, and so we need to override it (*Same-origin policy*), Therefor we use what's know as **Cross-origin resource sharing (CORS)** 
+	1. CORS is enabled to allow KNOWN FRONT-ENDS :
+		- So what we do is : we host the front-end with a different port than the back-end
+	2. CORS is enabled to allow ALL ACCESS (e.g. for APIs), to do that we need to add `two headers` when sending `data` :
+		1. `response.setHeaders("Access-Control-Allow-Origin", "*") ` // allows access from any origin
+		2. `response.setHeader("Access-Control-Allow-Methods", "GET")`  // allows only the `GET` method
