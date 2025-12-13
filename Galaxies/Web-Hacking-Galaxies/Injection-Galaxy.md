@@ -77,3 +77,4 @@ But here we don't want to use strings that we provide, we want strings provided 
 
 ## Testing 
 - It's better to not use `alert()` as it often gets filtered, instead use : `print()` > which will pop up a print box. or `prompt()` > which will pop up a prompt box  
+

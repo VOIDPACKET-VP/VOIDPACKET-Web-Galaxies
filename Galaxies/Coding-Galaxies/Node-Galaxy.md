@@ -62,3 +62,5 @@
 	2. CORS is enabled to allow ALL ACCESS (e.g. for APIs), to do that we need to add `two headers` when sending `data` :
 		1. `response.setHeaders("Access-Control-Allow-Origin", "*") ` // allows access from any origin
 		2. `response.setHeader("Access-Control-Allow-Methods", "GET")`  // allows only the `GET` method
+
+# Project : ROUTED SITE 
