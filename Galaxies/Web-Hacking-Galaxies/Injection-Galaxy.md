@@ -141,3 +141,12 @@ But here we don't want to use strings that we provide, we want strings provided 
 - It's a vulnerability where we mostly want to achieve code execution after uploading a file
 - Apps put some checks (to look for allowed formats etc. ), so we can intercept the request and change the file format, just know that you will need to modify the `Content-Type` header to match that format.
 
+## How to bypass the check
+- Now here there is no rule, you will need to try and understand how the app is deciding whether the format is valid or not :
+	- Sometimes it can be as simple as appending another format : `evil.php.png` , or maybe add a `null byte` : `evil.php%00.png` 
+	- The other way can be uploading a special file like an `.htaccess` file that allows us to execute files like : `.asd` as though they were PHP files.
+- One other way is to check the `magic bytes` which are the first bytes of the file that tells the system what kind of file it is ( you can search for them ).
+	- So what we can do is : 
+		- insert the payload inside the file data, under of course the `magic bytes`.
+		- change the format to `.php` since we need it to execute
+		- If we keep getting an error when we wanna execute the code, we can strip a bit of data from that file.
