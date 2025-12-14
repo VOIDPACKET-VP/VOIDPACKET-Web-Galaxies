@@ -209,3 +209,9 @@ But here we don't want to use strings that we provide, we want strings provided 
 - Similar to SSRF, we are looking for a `URL` or a `partial URL` .
 - To exploit it we need to host a malicious page where we want to send our user, Update that URL to the malicious one, and send it to the user.
 - A pretty common one is to send users to a page where it has a login form so that we can steal them
+
+# Vulnerable Components
+- Web apps mostly use third party tools, which they can introduce potential vulns if they're outdated, misconfigured etc. .
+- We can find them by simply listing all of the third party plugins the app uses with tools like : `builtwith`, `Whapplizer`, `DevTools` etc.
+- Then we also need to check their version information, which can be found in `readme files`, `source code`, `licenses` or sometimes in `the footer of the app` etc.
+- Then we can search for there CVEs etc. but doing this manually is very time consuming, so automating this process is encouraged
