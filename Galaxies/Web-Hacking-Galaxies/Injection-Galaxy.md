@@ -150,3 +150,62 @@ But here we don't want to use strings that we provide, we want strings provided 
 		- insert the payload inside the file data, under of course the `magic bytes`.
 		- change the format to `.php` since we need it to execute
 		- If we keep getting an error when we wanna execute the code, we can strip a bit of data from that file.
+
+# Cross-Site Request Forgery (CSRF)
+- It's an attack where we can trick users into performing an action within a web app where that user is authenticated to (e.g. changing account settings, transferring funds etc.)
+## How does it work
+- Let's use a simple scenario:
+	1. We need a legitimate session : whenever a user interacts with the app, the browser automatically send a session cookie so that the server know the request came from that exact user.
+	2. That user visits a malicious site (from general browsing, phishing, a site that's vulnerable to XSS and was forwarded there etc.)
+	3. That site (malicious site) contains a script that sends a request to the first site (the legit site) to make a transaction.  This action is carried out on the user's browser because his browser is still authenticated to the app.
+
+- We can of course use `CSRF tokens` and `Same site cookies` to protect against this vulnerability.
+## Basic PoC :
+- Example of changing email (this won't work for you, so tweak it) :
+	`<html>`
+	`<body>`
+	`<form action="<Where-to-send>" method="post">`
+	`<input type="text" name="email" value="<value-goes-here>">`
+	`<button type="submit">Submit</button>`
+	`</form>`
+	`<script>`
+	`window.onload = function(){`
+	`	document.forms[0].submit;`
+	`}`
+	`</script>`
+	`</body>`
+	`</html>`
+
+  - You can also use `Burp Suite's engagement tool` (it's for the paid version only)
+
+- When we meet with an app that uses `CSRF tokens` we need to think about :
+	1. Do we have XSS ? > if yes then we can send a request and steal the CSRF token, and inject that into our POST request and then send it on it's way.
+	2. Not all `CSRF tokens` are equal : what happens if i submit an old token ? is the logic of the app checking the value of the token ? or is it just checking if a token exists ? what if i send a very long or short token ?
+	3. Check [AppSecExplained](https://appsecexplained.gitbook.io/appsecexplained/common-vulns/command-injection) for more stuff to check.
+
+
+# Server-Side Request Forgery (SSRF)
+- It allows us to induce the server to make requests on our behalf.
+## How does it works
+- Let's use a simple example :
+	- Let's consider an app that fetches and displays images from URLs (The user provides the URL, and the app retrieves the image from it)
+	- So instead of supplying a legit URL, we might supply a URL to an internal system (which are generally not accessible for us, but not for the app).
+
+## Testing
+- We need to know where should we redirect the app, so with some endpoint fuzzing we might find some interesting endpoints and make the app fetches for it. 
+- We can fuzz for IPs, then if we find an alive host, we can fuzz for open PORTs (It's better to automate this task)
+
+## Blind SSRF
+- Demonstrating impact of blind SSRF can be tricky, sometimes we can exfiltrate data via out of band channels, bypass firewalls.
+
+# Subdomain Takeovers
+- When we take control of an organization's subdomain due to a misconfiguration or oversight :
+	- An organization sets up a subdomain `blog.example.com` and points it to a third-party hosting platform.
+	- When they decide to stop using that hosting platform and deletes it's accounts, they often forgets to update or remove the DNS entry pointing to it.
+	- Now we can claim that subdomain.
+ - A `404 Not Found` doesn't always means we have a subdomain takeover, but it's worth investigating
+
+# Open Redirects
+- Similar to SSRF, we are looking for a `URL` or a `partial URL` .
+- To exploit it we need to host a malicious page where we want to send our user, Update that URL to the malicious one, and send it to the user.
+- A pretty common one is to send users to a page where it has a login form so that we can steal them
