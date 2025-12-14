@@ -138,4 +138,6 @@ But here we don't want to use strings that we provide, we want strings provided 
 - `<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>`
 
 # Insecure File Uploads
-- 
+- It's a vulnerability where we mostly want to achieve code execution after uploading a file
+- Apps put some checks (to look for allowed formats etc. ), so we can intercept the request and change the file format, just know that you will need to modify the `Content-Type` header to match that format.
+
