@@ -16,7 +16,7 @@
 	1. Does that token apply to multiple users.
 	2. Is the token weak and can be brute forceable.
 	3. Does the token expire, can i use it multiple times.
-- You can check Alex's checklist for MFA in his website : appsecexplained
+- You can check Alex's checklist for MFA in his website : [Appsecexplained](https://appsecexplained.gitbook.io/appsecexplained/common-vulns/command-injection)
 
 # Authorization (Access Control)
 
