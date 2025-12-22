@@ -42,7 +42,7 @@
 4. application/xml
 5. etc.
 
-- To set the content type in the backend, we use the `setHeader()`  method on the `response` object , and we pass into it 2 strings : `"Content-Type"` and `"applicatioon/json"` 
+- To set the content type in the backend, we use the `setHeader()`  method on the `response` object , and we pass into it 2 strings : `"Content-Type"` and `"application/json"` 
 	- It will look something like this : `response.setHeader("Content-Type", "application/json")`
 
 - When sending data, we need to specify the status Code as well, we do that using the `statusCode` property on the `response` object : > `response.statusCode = 200`
@@ -64,3 +64,29 @@
 		2. `response.setHeader("Access-Control-Allow-Methods", "GET")`  // allows only the `GET` method
 
 # Project : ROUTED SITE 
+## .writeHead() Method
+- The `.writeHead()` method is another method of the `response` object and it's used to write the status code, headers etc. in just one line of code.
+	- `response.writeHead(200, {'Content-Type':'application/json'})` 
+- So although it sounds like it's better to use `.writeHead()` method instead of `.setHeader()` it actually comes with some shortcomings :
+	-  `.writeHead()` sends any headers immediately, while `.setHeader()` doesn't which allows you to set, modify it at any point before sending the response.
+	- We can't set headers with `.setHeader()` ***AFTER*** using `.writeHead()` 
+	- Header set with `.setHeader()` can be overruled by a header set with `.writeHead()` 
+	- And to top if off : ***YOU WON'T GET ANY ERRORS, YOU WILL GET UNEXPECTED BEHAVIOR*** 
+
+## Reading and Serving Data
+
+- We will have to be *OS agnostic* : we need a solution that doesn't care about what operating system we're using.
+- In our case we will need to generalize the file paths so that our users can get there hands on the resources without any OS problems.
+### Get current module directory
+- So we will need to use `import.meta` : an object of modular JS environment which provides metadata on the current module
+	- We'll try it with `server.js` since it's our module, if we log out `import.meta` this is what we get :
+		`[Object: null prototype] {`
+		`dirname : '/home/projects/bkabkabkab',`
+		`filename: '/home/projects/bkabkabkab/server.js',`
+		`resolve : [Function: resolve],`
+		`url : 'file:///home/projects/bkabkabkab/server.js'`
+		`}`
+	- The `dirname` object is the directory of our module, we can access it using : `import.meta.dirname` 
+- In normal JS, we can access that directory just with : `__dirname` (it's by default a global variable)
+
+### Path to resource from that directory
