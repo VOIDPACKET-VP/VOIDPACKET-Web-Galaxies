@@ -1,4 +1,4 @@
-# JWT (JSON Web Tokens) Security - Complete Testing Guide
+# JWT (JSON Web Tokens)
 
 # Table of Contents
 - JWT Fundamentals
