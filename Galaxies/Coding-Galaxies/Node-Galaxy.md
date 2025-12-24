@@ -90,3 +90,32 @@
 - In normal JS, we can access that directory just with : `__dirname` (it's by default a global variable)
 
 ### Path to resource from that directory
+- We can get the current working directory (CWD) of our file with : `process.cwd()` 
+#### Absolute paths
+- Show the full location of a file or folder on the system where the code is running
+- Always the same, no matter where you run your main script
+- Independent of the current working directory
+#### Relative paths
+- Relative to the file it appears in
+- Often includes `.` (current folder) or `..` (up one folder)
+- We often see them in import statements
+
+## Path Module
+- We import it using : `import path from 'node:path'` 
+- We use the `path.join()` method to join path segments into one path :
+	- `path.join(__dirname, 'public', 'index.html')` 
+## File System Module (FS)
+- We import it using : `import fs from 'node:fs'` 
+- Used to read file at a specified path 
+- Provides methods to interact with the file system of our OS :
+	1. Read files > `.readFile()`
+	2. Create files > `.writeFile()`
+	3. Update files > `.appendFile()`
+	4. Delete files > `.unlink()`
+	5. Rename files > `.rename()`
+- There are different ways to use the `fs module` :
+	1. `fs.readFileSync( <pathToResource> , <encoding (e.g. utf8)>)` > Uses Sync JS (Not the best)
+	2. `fs.readFile( <pathToResource> , 'utf8', (err, content) => { })` > We might end up in ***CALLBACK HELL***
+	3. `import fs from 'node:fs/promises'`  `await fs.readFile(< pathToResource> , 'utf8')` > we use ***ASYNC/AWAIT*** (best method)
+	- ***NOTE*** : the encoding is *OPTIONAL* : 
+		- When we don't specify an Encoding type, the content sent is a ***BUFFER*** type which browsers can interpret correctly using the specified `Content-Type` , it is also recommended not to specify an encoding type and let `Node and the browser` take care of that
