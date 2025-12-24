@@ -132,7 +132,7 @@ The techniques discussed in this guide are foundational. The security community 
 4. ***Container Isolation***: Deploy template processors in locked-down Docker containers to contain potential breaches
 
 ## Resources
-- Intigriti artcile on SSTI : ```https://www.intigriti.com/researchers/blog/hacking-tools/exploiting-server-side-template-injection-ssti```
+- Intigriti article on SSTI : ```https://www.intigriti.com/researchers/blog/hacking-tools/exploiting-server-side-template-injection-ssti```
 - PortSwigger article on SSTI : ```https://portswigger.net/web-security/server-side-template-injection```
 
 ## Conclusion
