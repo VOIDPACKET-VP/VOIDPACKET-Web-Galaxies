@@ -104,6 +104,7 @@
 - We import it using : `import path from 'node:path'` 
 - We use the `path.join()` method to join path segments into one path :
 	- `path.join(__dirname, 'public', 'index.html')` 
+- We can get hold of the file's extension using : `path.extname()` > this will help us specify the `Content-Type` for each file we want to send
 ## File System Module (FS)
 - We import it using : `import fs from 'node:fs'` 
 - Used to read file at a specified path 
@@ -119,3 +120,4 @@
 	3. `import fs from 'node:fs/promises'`  `await fs.readFile(< pathToResource> , 'utf8')` > we use ***ASYNC/AWAIT*** (best method)
 	- ***NOTE*** : the encoding is *OPTIONAL* : 
 		- When we don't specify an Encoding type, the content sent is a ***BUFFER*** type which browsers can interpret correctly using the specified `Content-Type` , it is also recommended not to specify an encoding type and let `Node and the browser` take care of that
+
