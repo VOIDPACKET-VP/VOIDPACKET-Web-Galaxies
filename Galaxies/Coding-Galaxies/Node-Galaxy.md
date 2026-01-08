@@ -125,4 +125,9 @@
 - It's about sanitizing user input to prevent attacks like : `XSS, SQLi, SSTI etc.`
 - We'll be using a dependency in the `npm package` called [sanitize-html](https://www.npmjs.com/package/sanitize-html) 
 - To install it, in the terminal we put : `npm install sanitize-html` , then to import it : `import sanitizeHtml from 'sanitize-html'` 
-- To use it we call the function : `sanitizeHtml( <what to sanitize> )` 
+- To use it we call the function : `sanitizeHtml( '<what to sanitize>' )` 
+- We can also choose what tags and attributes to allow : `sanitizeHtml('<what to sanitize>',  {allowedTags: ['h1'], allowedAttributes: {}})`
+
+- *Note* that `sanitizeHtml()` expects a ***string*** 
+
+- 
