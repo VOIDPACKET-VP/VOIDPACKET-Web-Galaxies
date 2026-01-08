@@ -121,3 +121,8 @@
 	- ***NOTE*** : the encoding is *OPTIONAL* : 
 		- When we don't specify an Encoding type, the content sent is a ***BUFFER*** type which browsers can interpret correctly using the specified `Content-Type` , it is also recommended not to specify an encoding type and let `Node and the browser` take care of that
 
+## Sanitization
+- It's about sanitizing user input to prevent attacks like : `XSS, SQLi, SSTI etc.`
+- We'll be using a dependency in the `npm package` called [sanitize-html](https://www.npmjs.com/package/sanitize-html) 
+- To install it, in the terminal we put : `npm install sanitize-html` , then to import it : `import sanitizeHtml from 'sanitize-html'` 
+- To use it we call the function : `sanitizeHtml( <what to sanitize> )` 
