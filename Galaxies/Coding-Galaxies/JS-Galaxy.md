@@ -80,3 +80,9 @@
     `const street = user?.address?.street; // "123 Main St"`
     `const zipCode = user?.address?.zipCode; // undefined (no error)`
 
+## Iterate through an ARRAY :
+- iterating over an array can be a bit tricky so here is a successful way :
+	- Let's say we have an array called `data` :
+		`for (const [key, value] of Object.entries(data)) { <rest of code goes here > }`
+
+- This can help you go through input user and sanitize them for example

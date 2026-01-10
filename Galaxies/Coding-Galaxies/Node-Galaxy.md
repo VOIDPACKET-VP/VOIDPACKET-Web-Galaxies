@@ -130,4 +130,55 @@
 
 - *Note* that `sanitizeHtml()` expects a ***string*** 
 
-- 
+## EventEmitter
+- Events occur when an action happen : when we click a button etc.
+- to use the `EventEmitter` we have to import it : `import {EventEmitter} from 'node:events'`
+- The steps are the following :
+	1. Import EventEmitter 
+	2. Create the emitter > `const eventToEmit = new EventEmitter()`
+	3. Define the listener function
+	4. Register the listener > `eventToEmit.on( <name of the event> , <function defined in step 3>)`
+	5. Emit the event > `eventToEmit.emit( <name of the event> , <params to pass to the function that will be triggered>)`
+
+## Server-Sent Events (SSE)
+- Provide a constant stream of data to a client.
+- Data only flows one way
+- HOW DOES IT WORK :
+	1. The client makes a request
+	2. The server makes a connection which stays open, sending data as needed 
+	3. The client listen for these updates and process them in real time
+- When working with SSE, you will need to set up some stuff :
+	1. Headers : 
+		1. `res.setHeader('Content-Type', 'text/event-stream')`
+		2. `res.setHeader('Cache-Control', 'no-cache')`
+		3. `res.setHeader('Connection', 'keep-alive')`
+	2. You will have to use `res.write()` instead of `res.end()` because well we don't want to shut the connection :
+		- `res.write(data: ${JSON.stringify({ event: 'temp-updated', temp: temperature})}\n\n`)`
+		- *NOTE* : the `\n\n` is required by SSE, it signals the end of a message block.
+	3. Front-End code :
+		1. Make a new EventSource : `const eventSource = new EventSource( <path to endpoint> )` , used to receive notifications from a server via SSE
+		2. Take control of the element we want to update `document.getElementById()` etc.
+		3. EventSource methods : 
+			1. `eventSource.onmessage = () => {}`
+			2. `eventSource.onerror = () => {}`
+			- e.g. :
+				`eventSource.onmessage = (event) => {`
+					`const data = JSON.parse(event.data)`
+					`const temperature = data.temp`
+					`tempDisplay.textContent = temperature`
+				`}`
+				`eventSource.onerror = () => {`
+					`console.log('Connection failed...')`
+				`}`
+
+## Nodemon :
+- [Nodemon](https://github.com/remy/nodemon#nodemon) is a package that does the process of : `edit > save > restart the server to see results` for us .
+ - To install it, in our project in the terminal we enter : `npm insatll --save-dev nodemon`
+ - NOTE : 
+	 - We will need to modify `scripts` in the `package.json` file :
+		 - We have to add : `"dev": nodemon server.js`
+	- NOW we can start the app with : `nodemon server.js` or `npm run dev` 
+- Also remember that :
+	1. Nodemon is made for ***server files*** and ***node.js*** 
+	2. It's only for development
+	3. It's configurable 

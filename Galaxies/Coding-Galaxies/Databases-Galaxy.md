@@ -1,0 +1,1 @@
+ - They allow us to store and manage data
