@@ -165,6 +165,24 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 	3. `NOT = !`
 
 
+# *Functions*
+- They are a reusable section of code that can be invoked, they can take arguments so that they can be used.
+## **Syntax**
+- We start with the return type (e.g. `void` ), then we give it a name (something descriptive) :
+	- `void <function's name>(){}`
+- Then to call it we basically type it's name followed by `()` : `<function's name>();`
+## **Arguments**
+- To pass `arguments` to a function, when we create it we have to add the data types and name of the arguments inside the `()` , here they are called `parameters` : 
+	- `void <function's name>(char <name>[], int <name>){}`
+- Then when we call the function we have to pass them inside again the `()` 
+
+## **return**
+- Returns a value back to where you call a function
+- when returning a value, we have to match the value's data type with the function's return type, so :
+	- if we're returning an `int` > `int <function's name>(){}`
+	- etc.
+
+
 # *Loops*
 ## **For loops**
 
