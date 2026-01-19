@@ -84,42 +84,69 @@
 
 ### 1. **Arrays**
 
-int scores[5] = {95, 87, 92, 78, 88};
+`int scores[5] = {95, 87, 92, 78, 88};`
 - _Use when_: Storing multiple values of same type
 - Fixed-size collection
+- NOTE : a string is an array 
+- To get the size of we'll use the `sizeof()` : `int sizeOfArray = sizeof(array) / sizeof(array[0]);` 
+#### *2D Array*
+- It's an array where each element is an array : `array[][ <number of columns> ] = {{}, {}, {}};` 
+- They are great if you want a matrix or grid of data 
+- For strings we must use `2d array` since each string is an array
+#### *Array of structs*
+- It's an array where each element contains a struct {} 
+- Helps organize and groups together related data
+- Syntax : `struct Student students[] = {{}, {}, {}};`
+- To access the items we will use `indexes` 
+
 
 ### 2. **Pointers**
 
-int *ptr;
-char *name = "Alice";
+`int *ptr;`
+`char *name = "Alice";`
+- The format specifier for pointers is : `%p` 
+- It's a variable that stores the memory address of another variable
+- They help avoid wasting memory by allowing us to pass the address of a large data structure instead of copying the entire data
 - _Use when_:
     - Dynamic memory allocation
     - Passing by reference
     - Arrays and strings
     - Data structures
+- e.g. : `int age = 20; int *pAge = &age;` > It's good practice to name a pointer with `p<name of the variable we want it's memory address>`
+- These are the same : `int *pAge` and `int* pAge` 
+- When passing variables to a function, we are actually passing a copy of that function, with pointers we can pass the `reference` of that variable and then dereference it inside that function : `void birthday(int *age){ (*age)++; }`
+- So we dereference with : `(*<pointer_name>)` 
+- NOTE : we can also just pass the memory address to a function instead of a pointer (since they are the same)
+
 
 ### 3. **Structures (`struct`)**
 
-struct Student {
-    char name[50];
-    int age;
-    float gpa;
-};
+`struct Student {`
+    `char name[50];`
+    `int age;`
+    `float gpa;`
+`};`
+- It's a custom container that holds multiple pieces of related information (similar to Objects in other languages)
 - _Use when_: Grouping different data types together
+- Now to assign those variable to a value : `struct Student student1 = {"VOIDPACKET", 20, 3.14};`
+- To access one of those elements we'll use : `student1.<variable>` > `e.g. student1.name` 
   
 ### 4. **Unions (`union`)**
 
-union Data {
-    int i;
-    float f;
-    char str[20];
-};
+`union Data {`
+    `int i;`
+    `float f;`
+    `char str[20];`
+`};`
 - _Use when_: Storing different data types in same memory location (one at a time)
 
 ### 5. **Enumerations (`enum`)**
 
-enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
+`enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};`
 - _Use when_: Working with named integer constants
+- Benefit is to replace numbers with readable names
+- Constants should all be uppercase letters
+- So now we can make variables and set them equal to something from that `enum Weekday` : `enum Weekday today = MON` now if we print `today` we will get `0` , that is the whole purpose of `enum` 
 
 ## *Type Qualifiers*
 
@@ -140,6 +167,8 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 |`float`|4 bytes|Approximate decimal numbers|
 |`double`|8 bytes|Precise decimal numbers|
 |`void`|N/A|No type, generic pointers|
+
+
 
 # *Conditional statements*
 ## **If else**
@@ -163,6 +192,10 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 	1. `AND = &&`
 	2. `OR = ||`
 	3. `NOT = !`
+
+## **Ternary Operator**
+- Syntax : `(condition) ? value_if_true : value_if_false;`
+
 
 
 # *Functions*
@@ -229,7 +262,12 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 - In windows : `Sleep( <duration in ms> );`
 - In Linux/Mac : `sleep( <duration in s> );`
 
-# Random
+# *Memory*
+## **malloc()**
+- It's a function that dynamically allocates a specified number of bytes in memory 
+
+
+# *Random*
 - `\0` is called a *Null Buffer* 
 
 - Sometimes when asking for user input, other inputs might get ignored by our C program because the `input buffer` is full even though we didn't enter anything, to counter that : 
@@ -240,6 +278,27 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 - When you have a variable that you don't wanna overwrite it (change it's value later), you can add the `const` key word before the declaration : `const double PI = 3.1415` , it's considered Best practice to make the `const` variables ***Capital letters*** .
 
 - To assign we use =, but to compare we use == 
+
+## **Pseudo-random**
+- we can generate stuff that appear to be random but are determined by a mathematical formula that uses a seed value to generate a predictable sequence
+- Advanced techniques : `Mersenne Twister` or `/dev/random` ...
+- We will need the `#include<stdlib.h> and <time.h>`, this way we can create a seed based on time 
+- Syntax : `srand(time( <use NULL or 0> ));` then to access the random number we call the `rand()` function
+
+## **typedef**
+- It allows us to give a `nickname` to existing `data types`, > `e.g. int becomes numbers`
+- Syntax : `typedef <data type> <new name>` > `typedef int numbers` 
+- so now instead of using `int` when declaring an `int variable` we will use `numbers`
+
+## **Work with files** 
+- We have a built in `struct FILE` inside the `<stdio.h>`, the data type is : `FILE` 
+- To create a file we use : `fopen("<path>", "<mode e.g. w to write, r to read>");` > e.g. `FILE *pFile = fopen("name.txt", "w");`
+- To write to a file : `fprintf(<file e.g. pFile>, "<format specifier>", <what to write>)`
+- To read a file : 
+	- we will need to use `read mode : r` in `fopen()` 
+	- Then we will need a `buffer` where data will be stored temporarily for us to read : `char buffer[ <size in bytes e.g. 1024> ] = {0};` 
+	- Then we will use : `while ( fgets(buffer, sizeof(buffer)), pFile) != NULL) { printf("%s", buffer); }`
+- To close the file : `fclose(pFile);` > *VERY IMPORTANT TO ALWAYS CLOSE THE FILE* 
 
 
 
