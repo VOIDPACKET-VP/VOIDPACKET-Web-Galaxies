@@ -182,15 +182,27 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 	- if we're returning an `int` > `int <function's name>(){}`
 	- etc.
 
+## **function prototype**
+- Provide the compiler with info about a function's : name, return type, params before it's actual definition
+- It's considered best practice to use them : they improve readability, organization and helps prevent errors 
+- e.g. :
+	- `void <function's name>(char <name>[], int <name>);` 
+
+
 
 # *Loops*
 ## **For loops**
+- Syntax : `for(Initialization; condition; update){ <code goes here> }` 
+- e.g. : `for (int i = 0; i < 10 ; i++){ printf("i is equal to %d\n", i); }`
+## **While loops**
+- Syntax : `while(condition){ <code goes here> }`
+### *Do While loop*
+- It's similar to a normal `while` loop, the only difference is it executes a piece of code and only then it checks the condition, but in a normal while loop we don't execute the code until the condition is satisfied 
+- Syntax : `do{ <code goes here> }while(condition);`
 
-
-
-
-
-
+## **Break and Continue**
+- `break;` is to break out of a LOOP > ***STOP***
+- `continue;` is to skip the current cycle of a loop > ***SKIP*** 
 
 # Libraries
 ## *<string.h>*
@@ -211,6 +223,11 @@ enum Weekday {MON, TUE, WED, THU, FRI, SAT, SUN};
 ## *<stdbool.h>*
 - It's a library that gives us the possibility to work with Booleans : `True and False` 
 - We declare Boolean variables like this : `bool isTrue = true;` 
+
+## <windows.h> && <unistd.h>
+- These contain sleep function, the `windows.h` is for windows machines, and `unistd.h` is for Linux and Mac machines
+- In windows : `Sleep( <duration in ms> );`
+- In Linux/Mac : `sleep( <duration in s> );`
 
 # Random
 - `\0` is called a *Null Buffer* 
