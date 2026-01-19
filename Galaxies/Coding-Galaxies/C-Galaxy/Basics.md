@@ -265,6 +265,24 @@
 # *Memory*
 ## **malloc()**
 - It's a function that dynamically allocates a specified number of bytes in memory 
+- e.g. `char *pGrades = malloc( <size in bytes> );` 
+- Then we will need to ***return back that memory space*** since we just "borrowed it" : `free(pGrades);` 
+- Then we will have to give the ***KEY*** back, which is the `pointer` : `pGrades = NULL;` 
+- If the `malloc()` fails it will return `NULL` which can cause `Segmentation Fault` so we need to check for that using an `if` statement, so if it fails we should `return 1;` to exit the program
+
+## **calloc()**
+- Similar to `malloc()` but it sets all allocated bytes to 0
+- `malloc()` is faster, but `calloc()` leads to less bugs
+- we will have to import `<stdlib.h>` 
+- Syntax : `calloc(<number of elements>, <size of element>);`
+- Then don't forget to `free()` the memory and return the key 
+
+## **realloc()**
+- resize the previously allocated memory 
+- we will have to include : `<stdlib.h>`
+- Syntax : `realloc(<pointer>, bytes);`
+- The `realloc()` will return a pointer to some new memory and copy the values from the old memory `<pointer> that's inside the realloc()` and will also `free()` the old memory
+- Now again if it fails it will return  a `NULL` so we have to check for that
 
 
 # *Random*
@@ -299,8 +317,7 @@
 	- Then we will need a `buffer` where data will be stored temporarily for us to read : `char buffer[ <size in bytes e.g. 1024> ] = {0};` 
 	- Then we will use : `while ( fgets(buffer, sizeof(buffer)), pFile) != NULL) { printf("%s", buffer); }`
 - To close the file : `fclose(pFile);` > *VERY IMPORTANT TO ALWAYS CLOSE THE FILE* 
-
-
+- Now if the `fopen()` fails we should exit the program by : `return 1;` 
 
 # Project Ideas
 
