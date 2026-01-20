@@ -1,6 +1,3 @@
-- MINUTE REACHED IN COURSE > 2:34:47 
-
-- This is really not all the basics but some of the "Advanced" basics 
 
 # Data Types
 ## *Primitive (Basic) Data Types*
@@ -330,4 +327,3 @@
 		- You can expand the scope from circles to cylinders, rectangles etc.
 	3. `Weight converter program` : The user chooses a choice : kg to pounds or the opposite, then the program gives the converted value
 		- You can add other units : temperature, speed, volume etc.
-	4. 
