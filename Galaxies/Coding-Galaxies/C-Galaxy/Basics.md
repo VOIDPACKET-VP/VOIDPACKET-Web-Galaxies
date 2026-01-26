@@ -282,6 +282,15 @@
 - Now again if it fails it will return  a `NULL` so we have to check for that
 
 
+- So when should we allocate memory :
+	- Ask yourself: "Where will this data live after function ends?"
+		1. If it needs to OUTLIVE the function → malloc
+		2. If it's only needed INSIDE function → stack (no malloc)
+	- EXAMPLES : 
+		1. **Returning arrays from functions**
+		2. **Dynamic size arrays**
+		3. **Strings you modify**
+
 # *Random*
 - `\0` is called a *Null Buffer* 
 
