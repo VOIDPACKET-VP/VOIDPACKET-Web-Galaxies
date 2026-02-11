@@ -1,1 +1,0 @@
-- Minute reached in Course >   51:36
