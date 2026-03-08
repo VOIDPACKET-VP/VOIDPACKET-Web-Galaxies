@@ -21,7 +21,7 @@
 - Sometimes when we apply a hash function to 2 keys, it generates the same index for them both, but both items can't go in the same place.
 - Resolving a collision by placing an item somewhere different than it's calculated address is called `open addressing` because every address is open to any item
 	- There is what's called `closed addressing` it's faster and better than `open addressing` and it's basically instead of doing a linear search to find an empty spot or to find the key in the first place, we basically connect a `linked list` to the `hash table` so every item that wants to go in position 5 will be connected to each other in form of a list 
-	- ![Hash table with linked lists](VOIDPACKET-Web-Galaxies/Galaxies/Coding-Galaxies/hash with linked lists.png)
+	- ![Hash table with linked lists](VOIDPACKET-Web-Galaxies/Galaxies/Coding-Galaxies/DSA/hash with linked lists.png)
 	- But note that if the `load factor` is low it's better to use `linear probing` `(Open addressing)` 
 	- The Load Factor ($\alpha$) is $\frac{n}{k}$ where $n$ is entries and $k$ is buckets. When $\alpha > 0.7$, performance drops.
 		- In C, you can't just "resize" an array easily. You have to allocate a **new, larger array**, then **re-hash** every single old item into the new positions. It’s a massive "suffer" moment in C coding.
