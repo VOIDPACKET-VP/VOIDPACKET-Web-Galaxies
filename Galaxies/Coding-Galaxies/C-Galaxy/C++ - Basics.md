@@ -329,3 +329,31 @@ public:
 - Visibility is not something that really has a use case, it's all about work style. But in Game Dev, it has a _massive_ use case called **Encapsulation** :
 	- Use case: It protects you from yourself. If `Player.health` is public, any random enemy script can accidentally do `player.health = 5000;`. If it's private, they have to use `player.TakeDamage(10);`, which allows you to run death animations or play sounds safely.
 # **Arrays**
+- Syntax is similar to C : `<data_type> <name>[size];` > `int array[5];`
+- **Arrays are just Pointers**
+	- An array `int arr[5]` is basically just a pointer to the first element.
+- **The Math:**
+	- When we do `arr[2]`, C++ is secretly doing: `*(arr + 2)`.
+	- It knows an `int` is 4 bytes, so it jumps $2 \times 4 = 8$ bytes ahead automatically.
+- **The Hack (Pointer Arithmetic):**
+	- If we turn the pointer into a `char*` (1 byte), we have to do the math ourselves.
+		- `*((char*)ptr + 8)` is the same as `ptr[2]`.
+	- If I move by bytes (using `char*`), I have to cast back to `(int*)` before I dereference. Otherwise, the compiler gets confused about how many bytes I'm trying to write. It's like: **Move as a char -> Write as an int.**
+		- `*((int*)((char*)ptr + 8) ) = 6;` 
+```
+int array[5]; // created on the stack (will be destroyed as soon as our function ends)
+int* another_arr = new int[5]; // created in the heap (we will have to destroy it ourselves or until the program ends)
+// we can delete it using the delete keyword, and since it's an array we have to add [] <name_of_array>
+delete[] another_arr;
+```
+- **Why `delete[]` and not just `delete`?** 
+	- When we use `new int[5]`, the compiler stores the size of the array somewhere hidden. When we call `delete[]`, the brackets tell C++: "Go look for that hidden size and call the destructor for **every single item** in this array." If we forgot the `[]`, it might only delete the first element, leaving the rest as a **Memory Leak**.
+- So we create it on the `Heap` when it has to do with lifetime :
+	- For example we have a function that returns an array, well here we need to create the array using the `new` keyword
+- In C++ 11 we have a new version of arrays that allow us to know the size of the array, bounce checking etc.  :
+  ```
+  #include <array>
+  std::array<<type>, <size>> <name>;
+  we can access the size with : <name>.size(); 
+  ```
+- But most game developers still use raw arrays in high-performance code to keep things as fast as possible.
