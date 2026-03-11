@@ -156,3 +156,176 @@ public:
   };
   // a char is an int at the end of the day
   ```
+
+```
+// Game dev example
+enum State {
+    IDLE = 0, RUNNING = 5, JUMPING // JUMPING will automatically become 6
+};
+```
+# **Constructors**
+- It's a special method that runs when we create a new instance of a class
+- It's a class method that allows us to initialize variable to `0`, so instead of letting them take what was left from memory when we allocate memory for them, they get set to 0
+- It's name *must be exactly the name of the class*
+- The primary use of it is to initialize that class and memory for it
+```
+class Entity {
+public:
+	float x, y;
+	
+	Entity() { // constructor
+		x = 0.0f;
+		y = 0.0f;
+	}
+	
+	void Print(){
+		std::cout << x << "," << y << std::endl; 
+	}
+};
+
+int main(){
+	Entity e;
+	e.Print();
+}
+```
+- You can have as many constructors you want, they all must have the same name (It's not an issue), and you can add parameters to those constructors
+```
+class Entity {
+public:
+	float x, y;
+	
+	Entity() { // constructor
+		x = 0.0f;
+		y = 0.0f;
+	}
+	
+	Entity(float X, float Y){
+		x = X;
+		y = Y;
+	}
+	
+	void Print(){
+		std::cout << x << "," << y << std::endl; 
+	}
+};
+
+int main(){
+	Entity e(10.2, 11.47);
+	e.Print();
+}
+```
+- By default C++ applies a default constructor for us, and we can tell the compiler 'no we don't want that constructor' by :
+  ```
+  <constructor_name>() = delete;
+  // There are other types of constructors like the move and the copy
+  ```
+# **Destructors**
+- It runs when we destroy an Object
+- `constructor` for initialization : to set up things for us, and `destructor` is for termination : it cleans everything that we used 
+- It applies for stack and heap objects
+- The only difference in syntax is we add `~` in front of the name : `~Entity(){}` 
+- If we don't use them we can risk `memory leaks` 
+- Destructors are mostly used when you used `new` in your constructor. If you manually allocated memory on the Heap (`new`), the destructor is where you _must_ call `delete`.
+# **Inheritance**
+- It's one of the most powerful features of OOP
+- It allows us to have a hierarchy of classes which relate to each other : so we can have a base class which have common functionality, and allow us to branch from it and create sub-classes
+- It helps so much with code duplication, remember we have to keep our code DRY
+- The syntax is pretty straight forward :
+```
+class <sub-class-name> : public <base-class> {
+};
+```
+
+```
+// Game example
+class Entity {
+public:
+	float X, Y;
+	void Move(float xa, float xy){
+		X += xa;
+		Y += ya;
+	}
+};
+
+class Player : public Entity { 
+	const char* Name; 
+};
+
+int main(){
+	std::cin.get();
+}
+```
+- here the `Player class` is not only of `type Player` but also of `type Entity` : so both
+- Now our sub-class contains everything that our base class has
+# **Virtual Functions**
+- They allow us to overwrite methods in sub-classes :
+	- Let's say we have 2 classes : A and B, B is a sub-class of A
+	- If we have a method in A and we marked it as virtual, we can overwrite it in the B class
+- The syntax : we add the key word `virtual` in front of the method or function in the main class, and in the sub-class where we overwritten it we mark it with the keyword `override` as best practice
+- They are not free of course : it adds two run times 
+- **Why we need it:** Imagine you have a `Shoot()` function. A normal gun shoots one bullet, but a Shotgun shoots five. You want to overwrite the normal `Shoot()` for the Shotgun
+```
+class Weapon {
+public:
+    int ammo = 30;
+    // We add 'virtual' so sub-classes know they are allowed to change this
+    virtual void Shoot() {
+        ammo--;
+        std::cout << "Pew! 1 bullet fired." << std::endl;
+    }
+};
+
+class Shotgun : public Weapon {
+public:
+    // We use 'override' just to be safe and clear
+    void Shoot() override {
+        ammo -= 5;
+        std::cout << "BOOM! 5 bullets fired." << std::endl;
+    }
+};
+
+int main() {
+    Weapon m4;
+    m4.Shoot(); // Prints: Pew! 1 bullet fired.
+
+    Shotgun doomStick;
+    doomStick.Shoot(); // Prints: BOOM! 5 bullets fired.
+}
+```
+# **Pure Virtual Functions : aka Interface**
+- It allows us to define a function in a base class that doesn't have an implementation and force sub-classes to implement that function :
+	- So these functions don't have code inside them pretty much, they don't do much, and we force every sub-class to have it's own version of that function
+	- So if the sub-class doesn't implement that function, we can't instantiate the sub-class
+- **Why we need it:** You want to make an `Interactable` class for your 2D game. You want Doors to open, and Chests to give loot when the player presses 'E'. You _force_ every interactable object to have an `Interact()` method, but the base class doesn't do anything itself :
+```
+class Interactable {
+public:
+    // The "= 0" means: "This is pure. I won't write code here. 
+    // Any class that inherits me MUST write their own Interact() code."
+    virtual void Interact() = 0; 
+};
+
+class Chest : public Interactable {
+public:
+    void Interact() override {
+        std::cout << "Chest opened! You got 50 gold." << std::endl;
+    }
+};
+
+class Door : public Interactable {
+public:
+    void Interact() override {
+        std::cout << "Door unlocked. Loading next level..." << std::endl;
+    }
+};
+// If you tried to make a class without Interact(), the compiler would give you an error!
+```
+# **Visibility**
+- It refers to how visible a member or method of a class actually are : so who can call, see and use them
+- We have 3 options in C++ :
+	- private `(the default option in classes)` : *only the main class*
+	- protected : *only the main class and it's subclasses*
+	- public `(the default option in structs)` : *everyone*
+- Visibility is not something that really has a use case, it's all about work style. But in Game Dev, it has a _massive_ use case called **Encapsulation** :
+	- Use case: It protects you from yourself. If `Player.health` is public, any random enemy script can accidentally do `player.health = 5000;`. If it's private, they have to use `player.TakeDamage(10);`, which allows you to run death animations or play sounds safely.
+# **Arrays**
