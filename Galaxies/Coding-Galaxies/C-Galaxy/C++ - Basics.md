@@ -357,3 +357,4 @@ delete[] another_arr;
   we can access the size with : <name>.size(); 
   ```
 - But most game developers still use raw arrays in high-performance code to keep things as fast as possible.
+# **Strings**
