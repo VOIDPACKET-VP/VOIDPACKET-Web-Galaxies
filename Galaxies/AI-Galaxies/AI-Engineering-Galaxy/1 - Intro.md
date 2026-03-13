@@ -6,3 +6,17 @@
 - Destination : e.g. OpenAI
 - AI Model : gpt-5-nano
 - Identity and Permissions : OpenAI API Key
+
+- We'll be using `openai client` which will take care of :
+	- Formats requests correctly
+	- Attaches our API key
+	- Handles responses and errors
+	- Saves us from writing raw HTTP calls
+# **Let's Start**
+- We first need to import `OpenAI`library in our main JS file : `import OpenAI from "openai"` 
+- Same thing for our `.env` file where we stored our :
+	- `AI_URL = https://api.groq.com/openai/v1`
+	- `AI_KEY = Check the Groq API File (can't put it here)`
+	- `AI_MODEL = openai/gpt-oss-20b`
+- IDK how this really works, but alhamdulillah SCRIMBA is taking care of it
+- HERE I REALIZED I FORGOT A LOT ABOUT JS, so we'll be back 

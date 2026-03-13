@@ -358,3 +358,136 @@ delete[] another_arr;
   ```
 - But most game developers still use raw arrays in high-performance code to keep things as fast as possible.
 # **Strings**
+- In C++ : the standard library has a class called : `std::string` which is what we'll be using to work with strings.
+- But we still can work with strings the same way as C
+- Strings are just an array of characters, when we declare a string we are actually declaring it as a pointer : because remember a string is an array and arrays are pointers
+- We also have to include the string library if we want to print it out, otherwise the standard library has a definition of it : `#include <string>`
+- So how does it work :
+	- `std::string name = "voidpacket";` that's it
+	- We do have methods :
+		- `name.size();`
+		- `name.find();`
+			- `bool contains = name.find("void") != std::string::npos;`
+	- If we want to append strings, we can't do it the same way as a high level language (e.g. JS) : `std::string name = "void" + "packet";` //this is wrong, because when we declare a sting this way in reality it's a `const char` which means it can't be modified (same as in JS)
+		- What we do is :
+			- `std::string name = "void";` then `name += "packet";`
+			- Or `std::string name = std::string("void") + "packet";`
+***NOTE*** :
+- If we want to pass a string to a function we don't do : 
+```
+void printString(std::string string){}
+// cause here we are making a copy of that string which will not modify the original one, plus copying a sting will slow our program
+// So what we do is we pass it as CONST REFRENCE (the const is optionel)
+void printString(const std::string& string){}  
+```
+- Also string literals are the ones we put inside : `""` , but characters inside : `''` 
+- Strings always end with a Null terminator : `\0` 
+- If we want to overwrite a char in our string this is how we should declare our string :
+  ```
+  char name[] = "void";
+  name[2] = 'y';
+  
+  and not like this :
+  char* name = "void"; // this is because we are trying to overwrite something that's stored in a READ ONLY space in memory
+  Also if we want to declare it with a * it's better to add the const :
+  const char* name = "void"; 
+  // But REMEMBER string literals are always stored in READ ONLY memory
+  ```
+- We know that `char` is 1 byte, but there are other types :
+	- `wchar_t` : `const wchar_t* name = L"void"; // don't forget to add that L`
+		- Which takes 2 bytes
+	- `char16_t` : `const char16_t* name = u"void"; // don't forget to add that u`
+		- Which takes 2 bytes, made for `utf-16`
+	- `char32_t` : `const char32_t* name = U"void"; // don't forget to add that U`
+		- Which takes 4 bytes, made for `utf-32`
+- There is this library, that has some functions to make our lives easier :
+```
+#include <string>
+
+int main(){
+	using namespace std::string_literals;
+	// now we can do stuff like append strings much easier
+	
+	std::string name = "void"s + "packet"; // see that s
+
+}
+```
+- if we wanna work with those other string data types this is how :
+  ```
+  // wchar_t :
+  std::wstring name = L"void"s + L"packet";
+  // char16_t :
+  std::u16string name = u"void"s + u"packet";
+  // char32_t :
+  std::u32string name = U"void"s + U"packet";
+  ```
+  - If we want to have multiple lines in our string : we add an `R` at the beginning of it :
+	  - `const char* para = R"(text_goes_here)";`
+- For more check : [cplusplus](https://cplusplus.com/reference/string/string/)
+# **Const**
+- It's a keyword we use to promise that our variable will always be constant
+- We can break that promise hhhhhhhh and bypass it just in real life (don't do that, Be a man of Honor)
+- Breaking the promise :
+  ```
+  const int MAX_AGE = 90;
+  const int* a = new int; // this is similar to this : int const* a = new int
+  *a = 2; // THIS WILL GIVE US AN ERROR
+  a = (int*)&MAX_AGE; // THIS WON'T GIVE US AN ERROR
+  
+  // so when we declare the const then int* we can make the pointer point somewhere else, but not change it's content
+  
+  AND the exacte opposite happense if we declare int* then const :
+  
+  const int MAX_AGE = 90;
+  int* const a = new int;  
+  *a = 2; // THIS WON'T GIVE US AN ERROR
+  a = (int*)&MAX_AGE; // THIS WILL GIVE US AN ERROR 
+  
+  And we can do this :
+  
+  const int* const a = new int
+  
+  which means we can't change the value or make it pointe somewhere else
+  ```
+-  The `const` Keyword in Classes (The "Read-Only" Promise)
+	- When you put `const` at the _end_ of a class method, you are making a promise to the compiler: **"This function will strictly read data. It will absolutely NOT change any variables inside this class."**
+	- Here is exactly how it looks in a Game Dev scenario:
+```
+class Player {
+private:
+    int health = 100;
+
+public:
+    // ❌ NON-CONST: This function modifies the class, so it CANNOT be const.
+    void TakeDamage(int damage) {
+        health -= damage; 
+    }
+
+    // ✅ CONST: This function only reads data. It promises not to touch 'health'.
+    int GetHealth() const {
+        return health;
+    }
+    
+    // If you tried to do `health = 50;` inside GetHealth(), the compiler would throw an error!
+};
+```
+- Why do we even need this?
+	- Look back at the string notes where you wrote: ```
+```
+void printString(const std::string& string)
+```
+
+- I noted that passing by **const reference** is the best way to avoid slow copies. But here is the catch: **When an object is marked as `const`, you are ONLY allowed to call `const` methods on it.**
+- Imagine we write a function to display our player's stats on the screen. To make it fast, we pass the Player by const reference:
+```
+void RenderPlayerStats(const Player& myPlayer) {
+    // This works perfectly because GetHealth() promises not to change anything.
+    int currentHP = myPlayer.GetHealth(); 
+    
+    // THIS WILL CRASH THE COMPILER! 
+    // myPlayer is const, and TakeDamage is NOT a const method. 
+    // The compiler stops you from accidentally breaking your "Man of Honor" promise.
+    myPlayer.TakeDamage(10); 
+}
+```
+# **Mutable**
