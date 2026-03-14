@@ -491,3 +491,80 @@ void RenderPlayerStats(const Player& myPlayer) {
 }
 ```
 # **Mutable**
+- It's a keyword, mostly used inside classes
+- Marking a member variable of a class `mutable` means that we can modify it's value inside `const methods`
+- Another use is with `lambdas` (still not reached the video on those yet) 
+# **Constructor Member Initializer Lists**
+- It's a way for us to initialize `class member functions` in the `constructor`
+- So when we write a `class` and we add `members` to that class, we need a way to initialize them, usually done in the `constructor` 
+- There are 2 ways :
+```
+// 1. Usual way
+
+class Entity {
+private:
+	std::string m_Name;
+public:
+	Entity(){
+		m_Name = "Unknown";
+	}
+	
+	Entity(const std::string& name){
+		m_Name = name;
+	}
+	
+	const std::string& GetName() const {return m_Name;}
+};
+
+int main(){
+	Entity e0;
+	std::cout << e0.GetName() << std::endl;
+	Entity e1("Void");
+	std::cout << e1.GetName() << std::endl;
+	std::cin.get();
+}
+```
+
+```
+// 2. The C++ way
+
+class Entity {
+private:
+	std::string m_Name;
+	int m_Score;
+public:
+	Entity() : m_Name("Unknown"), m_Score(0){ // Here is our initializer list
+	}
+	
+	Entity(const std::string& name) : m_Name(name){
+	}
+	
+	const std::string& GetName() const {return m_Name;}
+};
+
+int main(){
+	Entity e0;
+	std::cout << e0.GetName() << std::endl;
+	Entity e1("Void");
+	std::cout << e1.GetName() << std::endl;
+	std::cin.get();
+}
+```
+- In that list we have to initialize our members in the same order we have declared them as members
+- So why would we use it :  cause it doesn't look like we did much, 2 reasons :
+	1. Coding style, this is way cleaner : you can initialize the variables on top and the rest of code inside those `{}` 
+	2. ***MOST IMPORTANTLY*** : if we don't do it this way the `member variable` will be `constructed twice` : 
+```
+class Entity {
+private:
+	std::string m_Name; // the first time
+public:
+	Entity(){
+		m_Name = "Unknown"; // the second time
+		// because this is similar to this : m_Name = std::string("Unkown");
+	}
+```
+# **Ternary Operators**
+- Similar to JS : `condition ? if true : if false;`
+# **How to create Objects**
+- So when we create a class and it's time to use it, we have to instantiate it, we have 2 choices and the difference between them is : `Which memory we'll be creating our object in ?` SO `THE STACK and THE HEAP` 
