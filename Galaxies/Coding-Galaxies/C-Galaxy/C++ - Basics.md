@@ -568,3 +568,4 @@ public:
 - Similar to JS : `condition ? if true : if false;`
 # **How to create Objects**
 - So when we create a class and it's time to use it, we have to instantiate it, we have 2 choices and the difference between them is : `Which memory we'll be creating our object in ?` SO `THE STACK and THE HEAP` 
+- 
