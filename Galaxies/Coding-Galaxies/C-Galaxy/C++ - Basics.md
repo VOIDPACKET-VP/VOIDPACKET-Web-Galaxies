@@ -567,5 +567,53 @@ public:
 # **Ternary Operators**
 - Similar to JS : `condition ? if true : if false;`
 # **How to create Objects**
-- So when we create a class and it's time to use it, we have to instantiate it, we have 2 choices and the difference between them is : `Which memory we'll be creating our object in ?` SO `THE STACK and THE HEAP` 
-- 
+- So when we create a class and it's time to use it, we have to instantiate it, we have 2 choices and the difference between them is : `Which memory we'll be creating our object in ?` SO `THE STACK or THE HEAP` 
+- Stack Allocation :
+```
+#include <iostream>
+#include <string>
+
+class Entity {
+private:
+	std::string m_Name;
+public:
+	Entity() : m_Name("Unknown");
+	Entity(const std::string& name) : m_Name(name) {}
+	
+	const std::string& GetName() const {return m_Name;}
+};
+
+int main(){
+	// Creating it on the STACK
+	Entity entity; // here it calls the default constructor	
+}
+```
+- So if we can create an object like this, We create the object like this, now here are some when we can't create the object like that :
+	- When we want the object to stay ALIVE outside the scope
+	- The size of the entity is too large or we have multiple entities ...
+- Heap Allocation :
+```
+#include <iostream>
+#include <string>
+
+class Entity {
+private:
+	std::string m_Name;
+public:
+	Entity() : m_Name("Unknown");
+	Entity(const std::string& name) : m_Name(name) {}
+	
+	const std::string& GetName() const {return m_Name;}
+};
+
+int main(){
+	// Creating it on the HEAP
+	Entity* entity = new Entity; 
+	delete entity // we have to free the memory since we used the HEAP
+}
+```
+- So allocating on the STACK is faster than the HEAP, it's easier and whenever we can we use the STACK
+# **The new Keyword**
+- It's for allocating memory on the HEAP : `new <data_type>;` 
+- `new` returns a `pointer` so : `int* b = new int;` 
+- Remember we have to use `delete` every time after using `new`
