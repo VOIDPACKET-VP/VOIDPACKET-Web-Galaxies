@@ -18,7 +18,7 @@
   - If we want one of the options to be selected by default we add `selected` : `<option value="telepathy" selected>Telepathy</option>`
   - We can make it scrollable (so it won't show everything, which might hide some elements) using : `size="<number_of_el>"` inside the `select` tag : `<select id="superpowers" size="4">`
   - You can add the `multiple` keyword inside the `select` tag to choose multiple options instead of 1
-  - If you want to seperate the options into groups you can put them inside `optgroup` tags :
+  - If you want to separate the options into groups you can put them inside `optgroup` tags :
 ```
 <optgroup label="physical">
 	<option value="flight">Flight</option>
