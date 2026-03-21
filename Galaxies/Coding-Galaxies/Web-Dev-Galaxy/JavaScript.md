@@ -1,3 +1,4 @@
+
 # indexof()
 - It allows you to take control of an object using an index.
 - If you want to like compare 2 objects' values using an array as a comparer, use the `indexof()` method.
@@ -20,6 +21,17 @@
 - if we only have one type of an html element in our HTML document, we can control it just by :
 	  `document.<elementName>`
 	  e.g. :  `document.body`
+- We can update the `css` style of an element using `JS` using : `<element>.style` :
+- ```
+  // On click we change the display property 
+  
+	const revealBtn = document.getElementById('reveal-btn')
+	const answer = document.getElementById('answer')
+	revealBtn.addEventListener('click', function(){
+	    answer.style.display = 'block'
+	})
+  ```
+
 
 
 # Time 
@@ -46,6 +58,8 @@
 		`document.getElementById("time").textContent = date.toLocaleTimeString("en-us", {timeStyle: "short"})`
 		`}`
 	`setInterval(getCurrentTime, 1000)`
+
+- We can use `setTimeout()` which executes code after a specified amount of time : `setTimeout(<function>, <time in ms>)`
 
 # Short-circuiting, Nullish coalescing, and Optional Chaining
 
@@ -86,3 +100,37 @@
 		`for (const [key, value] of Object.entries(data)) { <rest of code goes here > }`
 
 - This can help you go through input user and sanitize them for example
+
+## How to turn Objects into Arrays
+- Let's say we have the following object :
+  ```
+  const loginCredentials = {
+    "rafidhoda": "BestPassword123",
+    "shahrukhkhan": "InBigCitiesSmallThingsHappen",
+    "jackblack": "ThisIsNotTheGreatestPasswordInTheWorld"
+}
+  ```
+- We use
+```
+Object.keys(<the object>) // To get only the keys
+Object.values(<the object>) // To get only the values
+Object.entries(<the object>) // To get key value pairs in an array
+```
+
+# Something cool we can do is :
+- So instead of making a mobile app, we can actually make our web app be a mobile app, they are called `Progressive Web App` :
+	- It looks and feels like a Mobile app
+```
+This is what we need, a site.webmanifest file that contains :
+
+{
+    "name":"",
+    "short_name":"",
+    "icons":[
+        {"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}
+        ],
+    "theme_color":"#ffffff",
+    "background_color":"#ffffff",
+    "display":"standalone"
+}
+```
