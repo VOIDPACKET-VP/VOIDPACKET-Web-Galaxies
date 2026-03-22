@@ -214,3 +214,175 @@ person.name = 'VOID'
 
 ### Hoisting
 - It basically allows us to execute/access declared variables and functions before we reach them in code by moving them to the top during compilation
+
+## Methods & Loops
+### for...of
+- It's a nicer way of iterating through arrays (are type of objects)
+- Syntax :
+	- `for (let <name_for_current_element> of <array>) {}` it's similar to python
+- EXAMPLE :
+```
+const characters = [
+    {
+        title: 'Ninja',
+        emoji: '🥷',
+        powers: ['agility', 'stealth', 'aggression'],
+    },
+    {
+        title: 'Sorcerer',
+        emoji: '🧙',
+        powers: ['magic', 'invisibility', 'necromancy'],
+    },
+    {
+        title: 'Ogre',
+        emoji: '👹',
+        powers: ['power', 'stamina', 'shapeshifting'],
+    },
+    {
+        title: 'Unicorn',
+        emoji: '🦄',
+        powers: [ 'flight', 'power', 'purity'],
+    }
+]
+
+// To iterate over the powers arrays we can use for of :
+
+for (let character of characters){
+    for (let power of character.powers){
+        console.log(power)
+    }
+}
+```
+### For...in
+- Syntax : similar to `for...of`
+- So what's the difference :
+
+| for...of                                                                      | for...in                                                         |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Use it to iterate over the values of an iterable object : strings, arrays ... | Use it to iterate over all enumerable property keys of an object |
+### .forEach()
+- It's a method to iterate over arrays
+- Syntax : `<array>.forEach(function(<name_for_current_element>){ <code> })`
+- It's the same as `for...of` but this one is much neater
+- If we take the same example in the `for...of`, we can do the same thing by nesting a `.forEach()`
+```
+characters.forEach(function(character){
+    character.powers.forEach(function(power){
+        console.log(power)
+    })
+})
+```
+- We can even know the index :
+	- `characters.forEach(function(character, index){}` 
+
+### .includes()
+- Allows us to check if an array holds a given value
+- Syntax : `<array>.includes(<what we wanna look for>)` : it returns Boolean value : `true or false`
+
+### .map()
+- It's again for iterating over arrays
+- This method returns an ARRAY which we can store in a var or return it with a function (see example)
+- Syntax : 
+	- `const newArray = <array>.map(function( <name_for_current_element> ) { <code> } )` 
+- EXAMPLE :
+```
+//Convert these Miles to KM!
+
+// (Store in a var)
+const distanceMilesArr = [140, 153, 161, 153, 128, 148]
+const conversionFactorMilesToKm = 1.6
+
+const distanceKmArr =distanceMilesArr.map(function(distanceMiles){
+    return distanceMiles * conversionFactorMilesToKm
+})
+
+-------------------------------------
+
+// (Return with a function) 
+const distanceWalkedMilesArr = [140, 153, 161, 153, 128, 148]
+const conversionFactorMilesToKm = 1.6
+
+function convertMilesToKms() {
+    return distanceWalkedMilesArr.map(function (distanceMiles, index) {
+        return `Month ${index}: ${distanceMiles * conversionFactorMilesToKm}KM`
+    })
+}
+console.log(convertMilesToKms())
+```
+- We can have access to the index similar to `forEach()` 
+- The best thing about `.map()` is that it returns an array, in fact don't use it if you won't be using that new array
+
+| .map()                         | .forEach()                      |
+| ------------------------------ | ------------------------------- |
+| if you will use that new array | If you don't need the new array |
+
+### .join()
+- It's best for creating strings from arrays, it actually works as a compliment to the `.map()` method :
+	- So it concatenates elements of an array into a string
+	- We can choose how elements are separated :
+		- `<array>.join('<your seperator>')` it can be a space, comma, point, or *just empty string* 
+	- It returns the new string
+- Syntax : `<array>.join()` 
+
+### .filter()
+- It's used to filter array data using a given condition : it returns true or false
+- Something we can do is : if the condition is true we can push that element to a new array
+- Syntax : `<arrat>.filter(function(name_for_current_element) { <condition_or_code> })`
+- EXAMPLE :
+```
+const ages = [1, 5, 9, 23, 56, 10, 47, 70, 10, 19, 23, 18]
+const adults = ages.filter(function(age){
+    return age >= 18
+})
+// now adults will contain only the elements greater than or equal to 18
+```
+
+### .reduce()
+- All it does is it gives you just one thing, it's all about reducing 
+- Syntax :
+```
+const <name_of_var_for_what_it_will_return> = <array>.reduce(function( <total>, <current_element> ) { <code> } )
+```
+- So at start : `total` will equal to the first element of the array, and `current_element` will equal to the second element of the array
+- Then `.reduce()` will apply the code to these params, and then `total` will equal to the second element of the array and `current_element` will equal to the third element of the array And so on
+
+- When working with Objects :
+	- `.reduce()` takes actually 2 params : the first one is the function, and the second is the initial value of `<total>`
+	- The second param is optional
+
+### Normal For Loops
+- Even though we have all of these methods and special for loops , a normal `for Loop` sometimes is the way to go mainly because of the option to use :
+	1. `continue`
+	2. `break`
+
+### Various Array Methods
+#### .every()
+- Syntax : `<array>.every(function(name_for_current_element) { <code> })`
+- Returns a Boolean value  :
+	- It returns `true` if EVERY item passes the test (code)
+
+#### .some()
+- Opposite of `.every()` 
+- Same syntax as `.every()`
+- Returns a Boolean value  :
+	- It returns `true` if one or more items passes the test (code)
+
+#### .find()
+- Finds the first item that passes the test (code)
+- Returns the item itself
+- Same syntax
+- If we want the item's index we can use : `.findIndex()` 
+
+#### .at()
+- Used to get an item in an array at a position
+- Syntax : `<array>.at(<number_even_if_it's_negative>)` : like python
+
+### .replace()
+- Used to replace something in a string with a given pattern
+- Syntax : `<array>.replace( '<pattern>', '<replacement>' )`
+- Only replaces the first Instance of that pattern
+- To replace all of the patterns : `.replaceAll()`
+
+- Sometimes we want to replace let's say only standalone `i` to uppercase `I` here to make sure that we don't change `i`s that are in words we use `Regex` : sequence of char that specifies a match pattern in text : `AI is good at creating it` so that's what you'll use in such case
+
+- The second param `<replacement>` can be a function (for complex logic) with a param : the match of the pattern
