@@ -114,3 +114,9 @@ while(WindowShouldClose() == false){
 - We can use `Keyboard Controls` to manually change the position of the object :
 	- `if(IsKeyDown(KEY_RIGHT)){ballX += 3;}`
 	- And we do the same thing for `Left, Up and Down` : but for LEFT and UP we decrease not increase (remember those coordinates)
+
+# Note 1
+- `Clamp()` : it's used to make a shape stay between some boundaries, also used for collisions
+	- **Function Signature:** `float Clamp(float value, float min, float max)`.
+	- **Behavior:** `result = (value < min) ? min : (value > max) ? max : value`.
+	- **Usage:** Frequently used to restrict movements within screen edges or map boundaries.
