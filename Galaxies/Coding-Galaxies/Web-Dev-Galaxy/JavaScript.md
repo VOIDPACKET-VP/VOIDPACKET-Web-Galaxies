@@ -386,3 +386,57 @@ const <name_of_var_for_what_it_will_return> = <array>.reduce(function( <total>, 
 - Sometimes we want to replace let's say only standalone `i` to uppercase `I` here to make sure that we don't change `i`s that are in words we use `Regex` : sequence of char that specifies a match pattern in text : `AI is good at creating it` so that's what you'll use in such case
 
 - The second param `<replacement>` can be a function (for complex logic) with a param : the match of the pattern
+
+## Function Expressions & Parameters
+### Function Expressions
+- Similar to how you declare a normal function but we store it in a const variable :
+```
+const <name> = function( <params> ) {
+	<code>
+}
+```
+- They are cleaner (arguably)
+- They are not hoisted : you can't call them before they're declared (unlike normal functions)
+- They depend on everyone's style
+
+### Arrow functions
+- Syntax : `(<params>) => { <code> }`
+- If you have exactly 1 param you don't need the `()` 
+- They are also stored in a const :
+```
+const <name> = ( <params> ) => {
+	<code>
+}
+```
+- We can also have this :
+```
+const <name> = ( <param> ) => < 1_line_code >
+// Here there is no need for `return` or `{}` 
+```
+
+### Default params
+- Let's say our function takes a param or 2 ... we can set a default value to that param that if we don't pass the param the default value will be used
+- Syntax : `function( <param> = <default_value> ) { <code> }`
+
+### The Rest param
+- It's a way of catching the rest of the arguments
+- It's used when we don't know how many arguments will be passed to our function
+- It stores those arguments inside an array : which means we can iterate through them
+- Syntax : `function( <param>, ...<restParam>) { <code> }`
+
+- EXAMPLE :
+```
+function setPermissionLevel(permissionLevel, ...names) {
+    names.forEach((name) => console.log(`${name} now has ${permissionLevel} level access.`))
+}
+setPermissionLevel('admin', 'Dave', 'Sally', 'Mike')
+```
+- The rest param must be the last parameter, and there can be 1 per function
+
+### Callback functions
+- Are functions that are passed to other functions :
+	1. Like in `.map()` etc.
+	2. Event listener
+	3. etc.
+
+## Async JS and APIs
