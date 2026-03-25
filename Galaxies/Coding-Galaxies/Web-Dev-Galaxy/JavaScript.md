@@ -440,3 +440,270 @@ setPermissionLevel('admin', 'Dave', 'Sally', 'Mike')
 	3. etc.
 
 ## Async JS and APIs
+### APIs
+- Stands for : `Application Programming Interface` 
+- You know what an API is (Talking to myself here) : It's like a intermediate that let's your program and someone else's program communicate 
+- We used an API before actually : `.getElementById`  etc.
+- Here is a place to see a lot of available Web APIs : [mozilla API Doc](https://developer.mozilla.org/en-US/docs/Web/API)
+
+### Clients & Servers
+- `Client` : is any device that connects to the internet to get data : He makes the `request`
+- `Server` : computer that accepts requests and sends a response back to the user (usually in JSON data)
+- JSON stands for : `Javascript Object Notation`
+
+### URL and Endpoints
+- URL is the base, and endpoint is the specific thing i want :
+	- `https://voidpacket.com/about` : here `/about` is the endpoint and `https://voidpacket.com` is the base URL 
+
+### fetching with .then()
+- It's used to fetch for data from an API, it's old but still used today
+- Syntax :
+```
+fetch( 'URL_TO_FETCH_FROM' )
+	.then( response => response.json())
+	.then(data => <code> )
+```
+- So what is `.then()` : it's a method that will pick up what we get from `fetch()` and make available to us in a param in a callback function which we usually call `response`
+- The `.json()` method takes the JSON data that we got and transforms it to `Javascript Object` 
+- NOTE that APIs don't always return JSON data (read the Doc of that API to know)
+- So if we go back to those `.then()` we can see that each result of the previous line code gets passed to the next line of code :
+	1. The result of `fetch()` goes to the first `.then()`
+	2. The result of the first `.then()` goes to the second `.then()`
+	3. And so on
+
+### Fetching with async/await
+- This is the Modern way
+- Syntax :
+```
+const response = await fetch( 'URL_TO_FETCH_FROM' )
+const data = await response.json()
+```
+- In the HTML we have to add the following in the `<script> tags` :
+	- `type="module"` 
+	- Or we can put our code inside a function (The most used way) and we add `async` in front of the function 
+		- `async function <name>() { <the fetching code> }`
+
+- Here the `await` is like we're saying wait till we get the response from the API then store it in  `const response`, and same thing with `const data` : wait till we store the result in `response` then do `.json()` and store it in `const data`
+
+### Promises
+- As the name suggests, `Promises` are just a promise that you will get a response : doesn't mean we'll get the data (just a response), due to that Promises have 3 states :
+	1. Fulfilled
+	2. Pending
+	3. Rejected
+```
+e.g. : Job interview > 
+	Once the interview is done they usually say we will get back to you within let's say a week.
+	Here they only promise you a response not necessarily that you got the JOB.
+```
+#### Handling Rejected Promises
+- We've seen how to handle fulfilled and Pending promises, now to the rejected ones : they're usually because an error occurred or something
+1. We use `.catch()` method with the old fetching way (`.then()`)
+	- Syntax :
+	  ```
+	  .catch( err => { <code> } )
+	  ```
+	- Something that we can add is : `.finally( () => { <code> } )` : it doesn't have anything to do with error handling, just it's a good thing to know : it runs at the end of the async operation (whether the promise is fulfilled or rejected)
+2. We use `try ... catch` blocks with the Modern fetching way (`async/await`) 
+	- Syntax :
+```
+try {
+
+	// code we want to try to execute
+	
+} catch(err) {
+
+	// code to execute on an error
+	
+} finally { // OPTIONAL
+
+	// code to execute at the end of the operation
+	
+}
+```
+
+### response.ok
+- The response const has a method called `.ok` that holds a `Boolean` value 
+- It's used to check the HTTP response status : `false` or `true` 
+```
+if (!response.ok){
+        throw new Error('There was a problem with the API')
+}
+```
+
+
+### More On APIs
+- So far we only used one HTTP method : `GET` used to get data
+- So actually `fetch()` takes another param : an Object where we specify a lot of stuff > one of them is the HTTP method, by default it's `GET` 
+```
+fetch( 'URL', {method: 'GET'} )
+```
+#### POST Method
+- With post we have to specify what we want to Send :
+```
+fetch( 'URL', {
+	method: 'POST',
+	body: JSON.stringify({
+		<data>
+	})
+})
+```
+- `JSON.stringify` is used to transform `JS Objects` to `JSON` 
+- With our request, we are sending a bunch of `Headers` which contain a lot of info : Content-Type, meta data etc.
+- We can add our own headers inside the 2nd param of `fetch()` like this :
+```
+headers: {"Content-Type": "application/json"}
+```
+
+```
+{
+	method: 'POST',
+	body: JSON.stringify({
+		title: 'Holiday Nightmares',
+        body: 'When I was kidnapped in Scotland…',
+		userId: 100
+	}),
+	headers: {"Content-Type": "application/json"}
+})
+```
+
+### Promise Constructor
+- Used to build our own Async actions
+- Syntax :
+```
+const promise = new Promise((resolve, reject) => {
+	<code> e.g. :
+	const success = Math.random() > 0.5
+	if (success) {
+		resolve('Operation successful')
+	} else {
+		reject('Operation failed')
+	}
+}) 
+try {
+	const response = await promise
+} catch(err) {
+	console.log(err)
+}
+```
+#### Working with images asynchronously
+- Instead of creating images this way :
+```
+const image = docunemt.createElement('img')
+image.src = "http://........"
+```
+which tries to load the image before it reaches the DOM
+- We can use the `Image()` constructor which loads the image only when it's in the DOM () :
+```
+const image = new Image()
+image.src = "http://......"
+```
+- This is the best way, and it's the way you should be doing it as well
+
+- Real WORLD example :
+```
+function preLoadImg(url) {
+  return new Promise( (resolve, reject) => {
+    const img = new Image()
+    img.src = url
+    img.alt = "a beautiful scene"
+    img.addEventListener('load', ()=> resolve(img))
+    img.addEventListener('error', ()=> reject('img has NOT loaded'))
+})
+```
+
+### Callback Hell
+- A situation where *multiple async operations are chained together using nested callbacks* which makes the code difficult to read and maintain
+- EXAMPLE :
+```
+function uploadFile(callback){
+    console.log('Step 1: Uploading file...')
+    setTimeout(()=> {
+        callback() // call next function
+    }, 1000)
+}
+
+function processFile(callback){
+    console.log('Step 2: Processing file...')
+    setTimeout(()=> {
+        callback() // call next function
+    }, 1000)
+}
+
+function notifyUser(callback){
+    console.log('Step 3: Notifying user...')
+    setTimeout(()=> {
+        callback() // call next function
+    }, 1000)
+}
+
+
+/// HERE IS THE PROBLEME : 
+
+uploadFile(()=> {
+    processFile( ()=> {
+        notifyUser( ()=> {
+            console.log('All steps completed!')
+        })
+    })
+})
+```
+- Here is where Promises saves us from this :
+```
+function uploadFile() {
+    return new Promise((resolve, reject) => {
+        console.log('Step 1: Uploading file...')
+        setTimeout(() => {
+            resolve() // Call the next step after 1 second
+        }, 1000)
+    })
+}
+
+function processFile() {
+    return new Promise((resolve, reject) => {
+        console.log('Step 2: Processing file...')
+        setTimeout(() => {
+            resolve() // Call the next step after 1 second
+        }, 1000)
+    })
+}
+
+function notifyUser() {
+    return new Promise((resolve, reject) => {
+        console.log('Step 3: Notifying user...')
+        setTimeout(() => {
+            resolve() // Call the next step after 1 second
+        }, 1000)
+    })
+}
+
+
+/// MUCH BETTER :
+
+try {
+    await uploadFile()
+    await processFile()
+    await notifyUser()
+    console.log('All steps completed!')
+} catch(err) {
+    console.log(err)
+}
+```
+
+### Promise.all
+- It's used when we want to execute multiple promises concurrently, so the result : is either they all resolve or the catch block gets triggered.
+- Also the OUTPUT of the `Promise.all` is an ARRAY.
+```
+const result = await Promise.all([promise1, promise2, promise3])
+```
+
+## Logical Operators & Coalescing
+### Short-circuiting with || (OR)
+
+
+### Short-circuiting with && (AND)
+
+
+### Nullish Coalescing
+
+
+### Optional Chaining
