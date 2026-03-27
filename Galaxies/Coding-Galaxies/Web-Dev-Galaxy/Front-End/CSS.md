@@ -11,7 +11,7 @@ And then we add the `margin-top` , `margin-left` etc. and we set them to `auto` 
 	  ```
 	  - This can be helpful with nav bars, menus ...
 # Note 2
-- Sometimes `elements` within `elements` will have a default `margin` which can cause some overflows, to deal with devs use :
+- Sometimes `elements` within `elements` will have a default `margin` which can cause some overflows, to deal with it Devs use :
   ```
 * {
     box-sizing: border-box;

@@ -697,13 +697,62 @@ const result = await Promise.all([promise1, promise2, promise3])
 ```
 
 ## Logical Operators & Coalescing
-### Short-circuiting with || (OR)
+### Short-circuiting
+- It's basically like `if else` but it's more concise and neater
+#### with || (OR)
+- Syntax : `const <name> = <condition result if true> || <condition result if false>`
+- The result will be the first ***truthy condition***
+```
+const jobHunter = {
+    name: 'Tom Chant',
+    jobSearchArea: 'Europe',
+}
 
+const workLocation = jobHunter.jobSearchArea || 'Worldwide'
 
-### Short-circuiting with && (AND)
+console.log(`${jobHunter.name}'s work location is ${workLocation}`)
+```
+#### with && (AND)
+- If the code on the left is true the code in the right will run :
+```
+const user = {
+    userName: 'Tom',
+    role: 'admin',
+}
 
+user.role === 'admin' && console.log('Dashboard Displayed')
+```
+- And if the code in the left is false the code in the right won't run 
 
 ### Nullish Coalescing
-
+- Syntax : similar to `||` and `&&` but with `??`
+- It's very similar to `||` but the right side code runs only if the left side code is equal to : 
+	1. `null`
+	2. `undefined`
+- Unlike `||` that will run it as long as the left side is falsy
 
 ### Optional Chaining
+- It's used with complex objects :
+```
+const library = {
+    sections: {
+        fiction: {
+            genre: {
+                fantasy: [
+                    { title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 },
+                    { title: "A Game of Thrones", author: "George R.R. Martin", year: 1996 }
+                ],
+                scienceFiction: [
+                    { title: "Dune", author: "Frank Herbert", year: 1965 },
+                    { title: "Neuromancer", author: "William Gibson", year: 1984 }
+                ]
+            }
+        }
+    }
+}
+```
+- It's gonna a pain to go deep into this object and access an element's value, so we can use *Optional Chaining*
+- Syntax : `?.` 
+- Now we can handle errors : undefined, the possibility that one of the parent objects doesn't exist etc.
+
+## Working with Objects
