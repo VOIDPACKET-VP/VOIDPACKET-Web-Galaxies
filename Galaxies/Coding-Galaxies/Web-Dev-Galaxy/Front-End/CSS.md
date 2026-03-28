@@ -13,7 +13,7 @@ And then we add the `margin-top` , `margin-left` etc. and we set them to `auto` 
 # Note 2
 - Sometimes `elements` within `elements` will have a default `margin` which can cause some overflows, to deal with it Devs use :
   ```
-* {
+*, *::before, *::after {
     box-sizing: border-box;
 }
   ``` 
@@ -48,3 +48,10 @@ margin: auto;
 - `z-index` 's default is `auto` which is equal to `0`, so when you don't use it, by default it's equal to `0`
 # Note 4
 - We can take control of a child element's alignment withing a flex display (`display: flex;`) using : `align-self: <position>;` 
+
+# CSS Grid
+- Grid is 2D unlike flexbox (1D)
+- We can achieve complex layout with less HTML
+- We have complete control over Order of elements
+- etc.
+- 

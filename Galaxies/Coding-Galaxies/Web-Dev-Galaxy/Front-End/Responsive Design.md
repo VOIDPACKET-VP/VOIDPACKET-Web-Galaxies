@@ -1,4 +1,4 @@
-- We use Relative Units (e.g. em, %) not absolute (e.g. px)
+- We use Relative Units (e.g. `em`, %) not absolute (e.g. `px`)
 
 # Note 1
 - When using `%` on `width` : the percentage is based on the width of the parent element : this can be helpful when making stuff like `progress bar` etc.
@@ -100,4 +100,39 @@
 ```
 - We also have a shortcut that mixes them both :
 	- `flex: <grow> <basis>`
-- 
+
+## Reordering Flex items
+- The order of items originally follows the order set in the HTML
+- We can use The CSS property `order: <number>;` to reorder the items within a container 
+```
+HTML -----
+<div class="container">
+	<div class="item goggles">🥽</div>
+	<div class="item tube">🧪</div>
+	<div class="item dish">🧫</div>
+	<div class="item coat">🥼</div>
+</div>
+
+CSS -----
+.coat {
+    order: 1;
+}
+.dish {
+    order: 2;
+}
+.tube {
+    order: 3;
+}
+.goggles {
+    order: 4;
+}
+```
+- The default value is `0`, you can also use *negative values*
+- `-1` to display the item first and `1` displays it last
+
+# Note 6
+## Viewport Units : vh , vw
+- vh is for the height, and vw is for the width
+- So it basically sets the height and width according to the user's viewport (the section where the site appears (idk how to explain it))
+- NOTE : `1vw = 1% of the viewport width`, same for `vh` 
+
