@@ -751,7 +751,7 @@ const library = {
     }
 }
 ```
-- It's gonna a pain to go deep into this object and access an element's value, so we can use *Optional Chaining*
+- It's a pain to go deep into this object and access an element's value, so we can use *Optional Chaining*
 - Syntax : `?.` 
 - Now we can handle errors : undefined, the possibility that one of the parent objects doesn't exist etc.
 
@@ -799,3 +799,167 @@ remainingBooks.forEach(([id, book]) => {
   console.log(`ID: ${id} Book: ${book.title} £${book.price}`)
 })
 ```
+
+### .hasOwn() and .hasOwnProperty()
+- used to know if an Object has a property, `hasOwn()` is the new one
+- They return a Boolean
+#### .hasOwnProperty()
+- Syntax :
+```
+<object>.hasOwnProperty(' <property_to_check_for> ')
+```
+
+#### .hasOwn()
+- This is a static method
+- Syntax :
+```
+Object.hasOwn( <object>, ' <property_to_check_for> ' )
+```
+
+
+- You SHOULD always use `hasOwn()` 
+
+### Assignment by Value/Reference
+- So for ARRAYS and OBJECTS when we reassign them to a new variable we are doing it with reference not with value (Remember that C/C++ stuff), so we don't actually make a new copy of that array or object, any change done in the new variable will be reflected in the old variable since it's the same array/object
+- There are 2 levels of copying arrays and objects in JavaScript
+![[Screenshot 2026-03-29 201540.png]]
+
+### Spread Operator (...)
+- It's used to expand and join arrays and much more, it's a bit hard to explain what can be done with it
+- The syntax is similar to the REST operator (...) which can cause confusion
+- EXAMPLE
+```
+const lunchMenu = ['Greek Salad', 'Open Sandwich', 'Parsnip Soup', 'Flatbread and Dip']
+
+console.log(...lunchMenu)
+// Greek Salad,"Open Sandwich","Parsnip Soup","Flatbread and Dip"
+
+console.log(lunchMenu)
+// ["Greek Salad", "Open Sandwich", "Parsnip Soup", "Flatbread and Dip"]
+```
+
+- You can see here what the Spread operator does : we don't have the `[]` anymore which is just powerful, which means it's no longer an array
+- We can do something like : `const array = [...oldArray]` just like that we have made a ***COPY*** of an array : a ***SHALLOW COPY*** to be exact
+
+- We can join arrays together like this :
+```
+const lunchMenu = ['Greek Salad', 'Open Sandwich', 'Parsnip Soup', 'Flatbread and Dip']
+const dinnerMenu = ['Lasagne', 'Strogonoff', 'Tagine', 'Katsu Curry']
+const sweetMenu = ['Mixed Berry Ice Cream', 'Chocolate Brownie', 'Orange Cheesecake']
+
+const eventMenu = [...lunchMenu, ...dinnerMenu, ...sweetMenu]
+```
+
+- NOTE: the same thing can be done with OBJECTS :
+```
+const salad1 = {
+    name: 'green',
+    ingredients: ['lettuce', 'tomato']
+}
+const salad2 = {...salad1}
+```
+
+### Object.assign()
+- It's a way of making a SHALLOW copy of an Object
+- Syntax :
+```
+Object.assign( <Where_to_copy> , <What_to_copy> )
+```
+
+### structuredClone()
+- Used to make a DEEP copy
+- Syntax :
+```
+const deepCopy = structuredClone( <Original_Object> )
+```
+
+### The 'this' keyword and Object methods
+- Functions that are stored in an object and can be used by that object are called `Methods`
+```
+const gamer = {
+    name: 'Dave',
+    score: 0,
+    incrementScore: function(){
+        gamer.score++  
+    }
+}
+
+gamer.incrementScore()
+```
+- But this is not the best way to create methods, because if the object's name changes we have to also change it everywhere we used it, that's why we have the `this` keyword
+```
+const gamer = {
+    name: 'Dave',
+    score: 0,
+    incrementScore: function(){
+        console.log(this)  
+    }
+}
+
+gamer.incrementScore() // IT WILL LOG THE WHOLE OBJECT 
+```
+- So it's like it references the Object
+- Now we create our methods like this :
+```
+const gamer = {
+    name: 'Dave',
+    score: 0,
+    incrementScore: function(){
+        this.score++  
+    }
+}
+
+gamer.incrementScore()
+```
+
+- NOTE : We use anonymous functions and not arrow functions because arrow functions deal with the `this` keyword a bit weirdly, so always use anonymous functions 
+- Now this might not sound amazing, but what if we have 50 or 100 gamer objects, our code won't be DRY : the `incrementScore` method will be repeated in all of them
+
+### Binding 'this'
+- So most of the time we would store methods in variables, but when using `this` it will actually give us an error :
+```
+const product = {
+    name: 'Vanilla Lip Gloss',
+    sku: 'w234fg',
+    stock: 276,
+    getProductInfo: function() {
+        console.log(this)
+    }
+}
+
+const productDetails = product.getProductInfo
+productDetails()
+
+/// THIS WILL GIVE AN ERROR
+```
+
+```
+THIS : const productDetails = product.getProductInfo
+IS EQUIVILANT TO THIS :
+const productDetails = function() {
+	console.log(this)
+}
+```
+- The problem is that here : `this` is undefined, to define it we use the `.bind()` method 
+
+- SYNTAX : `<object>.<method>.bind( <object> )`
+```
+const product = {
+    name: 'Vanilla Lip Gloss',
+    sku: 'w234fg',
+    stock: 276,
+    getProductInfo: function() {
+        console.log(this)
+    }
+}
+
+const productDetails = product.getProductInfo.bind(product)
+productDetails()
+```
+
+
+- NOTE :
+	- If `this` is used in an event listener, `this` refers to the element that triggered it
+
+
+## Creating Custom Objects
