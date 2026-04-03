@@ -54,4 +54,32 @@ margin: auto;
 - We can achieve complex layout with less HTML
 - We have complete control over Order of elements
 - etc.
-- 
+
+## Gird Columns and Gap
+- When we choose : `display: grid;` nothing changes visually but the following happens :
+	1. Margins no longer collapse
+	2. Elements in a grid container become a grid items
+	3. Grid items fall into place on the grid
+- One of the most used grid properties are :
+	- `grid-template-columns: <values in fr> ;` which sets the width of column
+	- You can add other values which will split the grid items into more columns :
+		- `grid-template-columns: 1fr 1fr;` : this will make 2 columns where they have a width equal to a fraction of available width (50% in this case)
+		- If we want it to just use the needed space for what it contains we can use `auto`
+	- We will also use `gap: <between rows in em> <between columns in em> ;` 
+	- We have : `grid-template-row: <values in fr> ;` which works with rows
+	- OR BETTER just use `grid-template: <values of rows> / <values of columns> ;`
+
+### Placing grid-items with span
+- We can now specify where each grid item sits
+- We use `grid-column: span <value without unit>;` or `grid-row` 
+- NOTE : using the `span` won't allow us to change the layout in a way that doesn't match the HTML (hope it makes sense)
+- We can also make a grid item stretch from start to end of the grid with : `grid-column: 1 / -1;` same thing for rows (Those numbers can be changed to specify what column or row number to start and to end at)
+### Repeat function
+- When using stuff like : `grid-template-columns: ;` we use a lot of for example `1fr` to not repeat it we use this: `repeat( <how many times> , <what to repeat> );` 
+```
+grid-template-columns: repeat(7, 1fr) auto;
+
+this is equal to : 
+
+grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;
+```
