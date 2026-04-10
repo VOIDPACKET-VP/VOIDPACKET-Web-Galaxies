@@ -963,3 +963,133 @@ productDetails()
 
 
 ## Creating Custom Objects
+- So let's take this example where we need to store data of employees, it will be stupid to do it manually (what if we have 200 employees) so what we do : 
+	- We pass our Object template (how we want the data to be stored and presented)
+	- And we pass the employee's data 
+	- Then we get back the Completed Object 
+- We have 3 ways to do that :
+	1. Factory Functions : basic 
+	2. Constructor Functions 
+	3. Classes : it's easy when things gets complex 
+
+### Factory Functions 
+- It's just a normal functions that returns an Object
+- Syntax :
+```
+function gamer(name, score) {
+    return {
+        name: name,
+        score: score,
+        incrementScore() {
+            this.score++
+        }
+    }
+}
+
+const alice = gamer('Alice', 10)
+alice.incrementScore()
+```
+
+- So again it's a normal function, we're using familiar syntax
+
+
+| Pros            | Cons            |
+| --------------- | --------------- |
+| Familiar syntax | Less Performant |
+| easy to read    | No Inheritence  |
+
+### Constructor Functions
+- The syntax is similar to a normal functions, but the first letter of the Name has to be UPPERCASE, and we use the keyword `this` instead of normal Object syntax :
+```
+function Gamer(name, score) {
+    this.name = name
+    this.score = score
+    this.incrementScore = function() {
+        this.score++
+    }
+}
+
+const dave = new Gamer('Dave', 0)
+dave.incrementScore()
+```
+
+### Classes
+- It's a special kind of function that works as a template for creating Objects
+- Syntax :
+```
+class <name_with_uppercase_first_letter> {
+	
+	// to set up our object we use 'constructor()' keyword
+	
+	constructor( <properties> ) {
+		<This is where we initialize the Object>
+	}
+	
+	// For any methods : we call them like a normal function
+	<name>() {
+		<code>
+	}
+}
+```
+
+EXAMPLE :
+```
+class Gamer {
+    constructor(name, score) {
+        this.name = name
+        this.score = score
+    }
+    
+    incrementScore() {
+	    this.score++
+    }
+}
+```
+
+- Now there is not much difference between `classes` and `constructor functions` so use what you like
+- ***NOTE*** : *Pro Devs don't create objects like this anymore, they tend to use frameworks like `React` etc. so you won't need to have a deep understanding of this*
+
+## Inheritance 
+### .call() and .apply()
+- These are JS methods, that allow us to control the value of `this` when invoking functions :
+	- So we've seen that `Objects` have the keyword `this` , well *functions* DO TOO
+#### .call()
+- When we have a function and we want to pass an Object's properties as an argument, we can do that using `.call()` :
+```
+<function>.call(<object>, <any_other_necessary_arguments>)
+```
+
+- NOTE : those properties when used inside that function need to start with `this.<the_property>`
+EXAMPLE :
+```
+function displayPolitician(currentSituation) {
+    console.log(`${this.name} is ${this.age} years old. Current situation: ${currentSituation}.`)
+}
+
+const politician1 = {
+  name: 'Carly Fowler',
+  age: 40
+}
+
+displayPolitician.call(politician1, 'In jail for corruption')
+```
+
+- So which means `this` represents that `Object` : if you log `this` inside that function it will return the Object
+
+#### .apply()
+- The only difference is the `<any_other_necessary_arguments>` needs to be an ARRAY :
+```
+<function>.apply(<object>, <any_other_necessary_arguments>)
+```
+
+- NOTE : That ARRAY will be destructed, so we can use each param individually
+
+### Inheritance
+- It's the mechanism by which objects inherit properties and methods from other objects
+- So let's say we have a parent Object (`baseEvent`) which will have some properties (`name, date, location, getDetails`) now we want every child Object (`concert`) to inherit these properties : That's how it works.
+- This forms what's known as : `PROTOTYPE CHAINE`
+	- It simply means that if an object B is a prototype of object A, it can inherit from object A, and if an object C is a prototype of B, it can inherit from B and indirectly inherit from A
+	- The First Object that isn't a prototype of an object actually is a prototype of `Object` : JS's base Object, which is referred to as `Object Object`
+- So when you try to look up for a method or property : JS checks if it exists in the current object then it keeps moving up the ladder of prototypes till it finds it or it till it reaches the end
+### Polymorphism
+- It allows properties and methods to get repurposed to meet that exact Object's needs : so the object inherits a method/property and override it's value or functionality 
