@@ -83,3 +83,7 @@ this is equal to :
 
 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;
 ```
+
+### grid-template-areas
+- This is another way to place items in a GRID
+- I really don't like it so am not gonna explain it 

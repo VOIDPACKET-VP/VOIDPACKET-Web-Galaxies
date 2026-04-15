@@ -115,7 +115,7 @@ It's used when we want to execute multiple promises concurrently, so the result 
 
 - To call an `async` function and get its returned value, you must use the `await` keyword within an `async` context (another `async` function) :
 
-	`// 1. Define the async function
+	// 1. Define the async function
 	async function fetchData() {
 	  // Simulate an asynchronous operation (e.g., fetching data from an API)
 	  return new Promise(resolve => {
@@ -134,4 +134,4 @@ It's used when we want to execute multiple promises concurrently, so the result 
 	  } catch (error) {
 	    console.error("An error occurred:", error)
 	  }
-	})()`
+	})()
