@@ -1093,3 +1093,149 @@ displayPolitician.call(politician1, 'In jail for corruption')
 - So when you try to look up for a method or property : JS checks if it exists in the current object then it keeps moving up the ladder of prototypes till it finds it or it till it reaches the end
 ### Polymorphism
 - It allows properties and methods to get repurposed to meet that exact Object's needs : so the object inherits a method/property and override it's value or functionality 
+
+### Inheritance with Constructor functions
+- This is the old way, it's not that good but it's good to know about it :
+- You basically have to add these 3 lines
+```
+// Inside the child constructor you add this :
+<parent_constructor>.call(this, <other_params_the_parent_takes>)
+
+// outside :
+<child_constructor>.prototype = Object.create(<parent_constructor>.prototype)
+<child_constructor>.prototype.constructor = <child_constructor>
+```
+
+- NOTE : the child constructor has to also take the parent's params 
+### Polymorphism with Constructor functions
+- So instead of doing it the normal way : 
+```
+// This inside the parent constructor
+this.<name_of_method> = function() {}
+```
+which will be resource intensive, it's better to create it in the prototype of the constructor :
+```
+// this outside it
+<parent_constructor>.prototype.<name_of_method> = function() {}
+```
+
+- Now to override the method inside a child constructor :
+```
+// Outside the constructor
+<child_constructor>.prototype.<method_name> = function() {
+    const <name> = <parent_constructor>.prototype.<method_name>.call(this)
+}
+```
+
+### Inheritance with Classes
+- It's the best, modern way to do this 
+```
+class <child> extends <parent> {
+	constructor( <params of parent + child> ) {
+		super( <params of parent> )
+		
+		<rest of code>
+	
+	}
+}
+```
+
+- The `super()` keyword does 2 things :
+	1. Access properties on the superclass's prototype
+	2. Invoke the superclass' constructor
+
+### Polymorphism with Classes
+- Again very simple, all we do is add the `super` keyword
+```
+class <child> extends <parent> {
+	constructor( <params of parent + child> ) {
+		super( <params of parent> )
+		<rest of code>
+	}
+	
+	
+	<method_name>() {
+        const <name> = super.<method_name>()
+        
+        <rest of code>
+        
+    }
+}
+```
+
+## Static Methods and properties
+- the `static` keyword defines methods and properties that belong to the class itself rather than to instances of the class. They are accessed directly through the class name
+- Syntax : `static <name_of_method_or_property>` 
+
+## Private Fields
+- Used to protect properties : we cannot change their value
+- Syntax, we add `#` at the beginning : 
+```
+// let's make destination private
+
+class Holiday {
+    #destination
+    constructor(destination, price) {
+        this.#destination = destination // since we want to assign it using a param we added this, but we can assign it in the first declaration 
+        this.price = price
+    }
+}  
+```
+
+### Getters and Setters
+- To get the value of private properties we use `getters`
+```
+// inside the class we add a method 
+
+get <name>() {
+	return this.#<name_of_private_property>
+}
+
+// then you call this method like you would normally do
+```
+
+- `setters` are used to modify the private property
+```
+// inside the class we add a method 
+
+set <name>() {
+	<code>
+}
+```
+
+## Symbols, Collections
+### Symbols
+- It's a primitive Data type
+- Each symbol is unique (similar to UUIDs)
+- Syntax : `const <name> = Symbol('<description>')`
+
+### Map Object
+- It doesn't have anything to do with the `map()` method
+- It holds Key value pairs with benefits :
+	- Keys can be of any data types
+	- Iterate over it with a `forEach`
+	- Insertion Order
+- Syntax :
+```
+const <name> = new Map()
+// you add key value pairs like this :
+<name>.set(key, value)
+
+// to get a value to a corresponding key : 
+<name>.get(key) 
+
+// we can get the size :
+<name>.size
+
+// to delete a key value pair :
+<name>.delete(key)
+
+// to check if a key exists :
+<name>.has(key) //returns a boolean
+
+// to iterate with forEach :
+<name>.forEach( (value, key) => {} )
+```
+
+### Set Object
+- Object that stores unique values (no duplicates, and only values so like an array) 
