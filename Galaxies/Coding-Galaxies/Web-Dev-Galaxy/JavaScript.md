@@ -1239,3 +1239,23 @@ const <name> = new Map()
 
 ### Set Object
 - Object that stores unique values (no duplicates, and only values so like an array) 
+- So which means we can use it to remove duplicates 
+- Syntax :
+```
+const normalArray = ['shoes', 'after shave', 'tesla', 'after shave', 'shoes']
+
+const setArray = new Set(normalArray)
+```
+
+- We can iterate with `forEach`, also we don't have access to all array methods, so if we want to have access to them we have to transform it back to a normal array
+```
+const setArray = Array.from(new Set(normalArray))
+```
+
+- We can `add` `delete`, check if it contains something with `has` and we can clear it with `clear()` 
+	- `setArray.add( <something> )`
+	- `setArray.delete( <something> )`
+	- `setArray.has( <something> )`
+	- `setArray.clear()` 
+
+## Advanced Function patterns and generators
