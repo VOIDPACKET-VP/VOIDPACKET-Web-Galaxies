@@ -1259,3 +1259,21 @@ const setArray = Array.from(new Set(normalArray))
 	- `setArray.clear()` 
 
 ## Advanced Function patterns and generators
+### Closures
+- No clue what benefit they have, they seem unnecessary
+
+### Immediately Invoked Function Expressions (IIFEs)
+- These are functions that run without being invoked : they run at the beginning of a session 
+- Syntax :
+```
+(function() {}) ()
+
+OR 
+
+(function <name>() {})
+<name>()
+
+```
+- The syntax is the same even if you have params or if it's an `async` function
+
+### Recursion
