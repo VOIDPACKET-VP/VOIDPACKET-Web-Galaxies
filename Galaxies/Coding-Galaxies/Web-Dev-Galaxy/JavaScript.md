@@ -1083,7 +1083,11 @@ displayPolitician.call(politician1, 'In jail for corruption')
 ```
 
 - NOTE : That ARRAY will be destructed, so we can use each param individually
-
+- Also used to bring back the `this` value (context) of a function when it's wrapped inside another function
+```
+<function>.apply(this, arguments)
+```
+- NOTE : arrow functions don't have this problem
 ### Inheritance
 - It's the mechanism by which objects inherit properties and methods from other objects
 - So let's say we have a parent Object (`baseEvent`) which will have some properties (`name, date, location, getDetails`) now we want every child Object (`concert`) to inherit these properties : That's how it works.
@@ -1277,3 +1281,106 @@ OR
 - The syntax is the same even if you have params or if it's an `async` function
 
 ### Recursion
+- The thing you need to know about recursion is it's used when you call a function inside itself :
+```
+function recursion() {
+	<code>
+	recursion()
+}
+```
+- The function also needs to have a base case : like a condition that once it's meet we break from the function :
+```
+function recursion() {
+	if (shit === bs) return poop
+	<code>
+	recursion()
+}
+```
+- Here is a Code example that reverse a string using recursion :
+```
+let str = 'SCRIMBA'
+let reversedStr = ''
+function reverseStr(str) {
+
+    let strLen = str.length
+    if (!strLen) return reversedStr
+    reversedStr += str[strLen - 1]
+
+    return reverseStr(str.slice(0, -1))
+}
+
+console.log(reverseStr(str))
+```
+
+### Currying
+- It's an advanced JS pattern that transforms functions from taking multiple params to a sequence of nested functions, each taking a single param  
+- Practical application :
+	1. Allows you to fix some arguments and defer the rest
+	2. It's useful if you have a situation where you repeatedly call a function with some of the same arguments
+- Example :
+```
+// This is the nested functions with currying
+const calculateVolume = length => width => height => length * width * height
+
+// Here we store those fixed arguments 
+const calculateBaseAreaVolume = calculateVolume(2)(3)
+
+// And here we call them with a changing height argument
+const totalVolume1 = calculateBaseAreaVolume(4)
+const totalVolume2 = calculateBaseAreaVolume(6)
+const totalVolume3 = calculateBaseAreaVolume(10)
+```
+- So `length` and `width` are fixed, but `height` isn't
+
+### Throttling and Debouncing
+- They are very similar, they basically don't allow code to execute multiple times at the same time 
+#### Throttling
+- Ensures a function is called at most once in a specified period of time
+#### Debouncing
+- Ensures a function is called only after a certain period has passed since the last triggering event
+- So basically if you call a function, it will execute only after that period has passed
+- If a function gets called during that period, the period resets
+
+### Generators
+- They are functions that can be paused and resumed, allowing them to produce a sequence of values over time
+- Syntax :
+```
+function* <name>() {
+	<code>
+}
+```
+- We use the keyword `yield` to pause and the method `next()` to resume
+- EXMAPLE :
+```
+const slidesArr = [
+    "1. Intro Slide",
+    "2. The current situation",
+    "3. Setbacks",
+    "4. Plans",
+    "5. A Positive Future"
+]
+
+functoin* generator(arr) {
+	for (const item of arr) {
+		yield item     /// Here we pause 
+	}
+}
+
+const slideGenerator = generator(slidesArr)
+console.log(slideGenerator.next())   /// Here we resume
+```
+
+- When a generator encounters `yield`, it "freezes" its state (including local variables and the instruction pointer) and sends a value back to the caller. It resumes only when the [Generator object's](https://www.google.com/url?sa=i&source=web&rct=j&url=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator&ved=2ahUKEwjO1byNlYeUAxWuSaQEHbg_HEsQy_kOegQIAxAB&opi=89978449&cd&psig=AOvVaw3w05d_7mhqgjEKCqGoYXK7&ust=1777143374056000) `next()` method is called again.
+- **The Iterator Result:** Every time `yield` is triggered, the `next()` method returns an object with two properties:
+    - `value`: The actual data yielded.
+    - `done`: A Boolean (false if there are more yields, true if the function has finished).
+    - EXMAPLE 
+```
+{value: '1. Intro Slide', done: false}
+```
+
+- So they are mostly used when we only want a certain amount of data instead of getting all at once
+- To get the `value` you need to access the `value` property :
+```
+slideGenerator.next().value
+```
