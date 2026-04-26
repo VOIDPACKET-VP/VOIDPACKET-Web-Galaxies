@@ -440,6 +440,9 @@ setPermissionLevel('admin', 'Dave', 'Sally', 'Mike')
 	3. etc.
 
 ## Async JS and APIs
+### Async JS
+- So `Synchronous JS` is the regular JS : when each command needs to finish before moving to the next command
+- So `Async JS` is JS code that run out of order, we can have multiple commands running at the same time, That's why API Calls are done ASYNC, because they take time.
 ### APIs
 - Stands for : `Application Programming Interface` 
 - You know what an API is (Talking to myself here) : It's like a intermediate that let's your program and someone else's program communicate 
@@ -472,6 +475,10 @@ fetch( 'URL_TO_FETCH_FROM' )
 	3. And so on
 
 ### Fetching with async/await
+- `async/await` makes the code appear to be `synchronous`
+- Syntax :
+	- `async` goes before a function
+	- Now we can use `await` before any method/function that returns a promise
 - This is the Modern way
 - Syntax :
 ```
@@ -495,6 +502,7 @@ e.g. : Job interview >
 	Once the interview is done they usually say we will get back to you within let's say a week.
 	Here they only promise you a response not necessarily that you got the JOB.
 ```
+- When chaining promises, the value returned by the previous `.then` gets passed to the next `.then` 's callback function param
 #### Handling Rejected Promises
 - We've seen how to handle fulfilled and Pending promises, now to the rejected ones : they're usually because an error occurred or something
 1. We use `.catch()` method with the old fetching way (`.then()`)

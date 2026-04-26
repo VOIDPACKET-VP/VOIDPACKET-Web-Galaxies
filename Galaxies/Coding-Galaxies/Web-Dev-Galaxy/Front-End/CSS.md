@@ -1,7 +1,7 @@
 # Note 1
 - When we have a Parent container and we want to position the child element somewhere specific we add this CSS to the parent :
 	- `display: flex;`
-And then we add the `margin-top` , `margin-left` etc. and we set them to `auto` to the child, just NOTE that it we have to use the opposite direction: 
+And then we add the `margin-top` , `margin-left` etc. and we set them to `auto` to the child, just NOTE that we have to use the opposite direction: 
 - If we want to set it to the top left :
 	- ```
 	  margin-right: auto;
