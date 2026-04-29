@@ -128,12 +128,12 @@ public:
 - The "Static Function" Trick : 
 	A static function inside a class can be called **without creating an object**.
 	- Normal: `Player p1; p1.Jump();`
-	- Static: `Player::GetTotalPlayers();` (You don't need a `p1` to exists to call this).
+	- Static: `Player::GetTotalPlayers();` (You don't need a `p1` to exist to call this).
 
 - If you're wondering: _"If it's shared/hidden, where is it stored?"_ Static variables are stored in a special part of the memory (the **Data Segment**), not on the Stack or the Heap. They live for the **entire duration** of the program.
 - For `static variables` we can use this naming convention : `s_<name>` 
 # **Enums**
-- It's a way to give a name to a value, so instead of having `int a, b, c;` we can just have am `enum` that has the variables `a, b and c`
+- It's a way to give a name to a value, so instead of having `int a, b, c;` we can just have an `enum` that has the variables `a, b and c`
 - An `enum` is a `4 byte integer`
 - Syntax and example :
   ```
@@ -160,7 +160,7 @@ public:
 ```
 // Game dev example
 enum State {
-    IDLE = 0, RUNNING = 5, JUMPING // JUMPING will automatically become 6
+    IDLE = 0, RUNNING = 5, JUMPING // JUMPING will automatically become 0
 };
 ```
 # **Constructors**
@@ -225,7 +225,7 @@ int main(){
 - It applies for stack and heap objects
 - The only difference in syntax is we add `~` in front of the name : `~Entity(){}` 
 - If we don't use them we can risk `memory leaks` 
-- Destructors are mostly used when you used `new` in your constructor. If you manually allocated memory on the Heap (`new`), the destructor is where you _must_ call `delete`.
+- Destructors are mostly used when you use `new` in your constructor. If you've manually allocated memory on the Heap (`new`), the destructor is where you _must_ call `delete`.
 # **Inheritance**
 - It's one of the most powerful features of OOP
 - It allows us to have a hierarchy of classes which relate to each other : so we can have a base class which have common functionality, and allow us to branch from it and create sub-classes
@@ -617,3 +617,123 @@ int main(){
 - It's for allocating memory on the HEAP : `new <data_type>;` 
 - `new` returns a `pointer` so : `int* b = new int;` 
 - Remember we have to use `delete` every time after using `new`
+# Implicit Conversion & Explicit Keyword
+## Implicit Conversion
+- Implicit means kind of not telling it exactly what to do, it just does automatically 
+- The compiler is allowed to perform ONE implicit conversion on your code
+```
+class Entity {
+private:
+	std::string m_Name;
+	int m_Age;
+public:
+	Entity(const std::string& name)
+		: m_Name(name), m_Age(-1) {}
+	Entity(int age)
+		: m_Name("Uknown"), m_Age(age)
+}
+
+int main() {
+	// Normal way of instantiating an Object
+	Entity a("Voidpacket");
+	Entity b(22);
+	
+	// Using Implicit Conversion
+	Entity a = "Voidpacket";
+	Entity b = 22;
+}
+```
+- We can do that because `Entity` has a constructor that takes an `int` and an `string`
+- You can also do the same thing with functions that take `Entity` as a param
+```
+void PrintEntity(const Entity& entity) {
+	<code>
+}
+
+int main() {
+	PrintEntity(22);
+}
+```
+## Explicit Keyword
+- It's the opposite to implicit, gets called in front of a constructor
+- When called it says that this constructor has to be explicitly called so no `implicit conversions` 
+- Syntax :
+```
+class Entity {
+private:
+	std::string m_Name;
+	int m_Age;
+public:
+	Entity(const std::string& name)
+		: m_Name(name), m_Age(-1) {}
+	explicit Entity(int age)
+		: m_Name("Uknown"), m_Age(age)
+}
+
+int main() {
+	Entity a(22); // now you either use the normal way
+	Entity b = (Entity)22; // use casting
+}
+```
+- When they are used :
+	- Writing Low level wrappers etc.
+	- Depends on coding style
+
+# Operators and Operator overloading
+- An Operator is like a function but instead of giving it a name we give it a symbol
+	- The arrow operator `->`
+	- The `<<` and `>>` 
+	- The `*` for addresses
+	- `new` and `delete`
+	- `,` and `()` can be an operator hhhhhh
+- Operator overloading : allowed to change the behavior of the operator in your program
+- Syntax :
+```
+<return_type> operator<symbol>( <params> ) {
+	<code>
+}
+```
+
+# The this keyword
+- It's only accessible to us with a `member funciton` : function that belongs to a class (method)
+- It's a POINTER TO THE CURRENT OBJECT INSTANCE THAT THE METHOD BELONGS TO
+```
+class Entity {
+public:
+	int x, y;
+	
+	Entity(int x, int y) {
+	
+		this->x = x; // the first x is the one decalred on top, the second is the param 
+		
+		this->y = y;
+	}
+}
+```
+- Another use case is passing `this` as to a function that takes `Entity` as a param inside the Object itself
+```
+void printEntity(Entity* e);
+
+class Entity {
+public:
+	int x, y;
+	
+	Entity(int x, int y) {
+	
+		this->x = x;
+		this->y = y;
+		
+		printEntity(this);
+	}
+}
+
+void printEntity(Entity* e){
+	<code>
+}
+```
+- If that function takes Entity as a reference, we have to dereference `this` : `printEntity(*this);` 
+
+# Object Lifetime
+- So we have to understand how does variables live in the Stack so that we can write code that doesn't crash, then we can leverage it and do clever things
+- You can check the NOTES in my personal [assembly notes](https://github.com/VOIDPACKET-VP/VOIDPACKET-Web-Galaxies/blob/main/Galaxies/Defense-Galaxies/Reverse-engineering-Galaxy/Architecture-Galaxies/1001%20x86-64%20Assembly.md)
+- 
