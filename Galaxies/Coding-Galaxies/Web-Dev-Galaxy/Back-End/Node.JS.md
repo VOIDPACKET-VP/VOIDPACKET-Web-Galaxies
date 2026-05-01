@@ -127,6 +127,7 @@ if (req.url.startsWith('/api/continent') && req.method === 'GET') {
 
 - We will have to be *OS agnostic* : we need a solution that doesn't care about what operating system we're using.
 - In our case we will need to generalize the file paths so that our users can get there hands on the resources without any OS problems.
+![[Screenshot 2026-05-01 191402.png]]
 ### Get current module directory
 - So we will need to use `import.meta` : an object of modular JS environment which provides metadata on the current module
 	- We'll try it with `server.js` since it's our module, if we log out `import.meta` this is what we get :
