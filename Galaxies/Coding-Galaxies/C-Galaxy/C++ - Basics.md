@@ -383,7 +383,7 @@ void printString(const std::string& string){}
 - Also string literals are the ones we put inside : `""` , but characters inside : `''` 
 - Strings always end with a Null terminator : `\0` 
 - If we want to overwrite a char in our string this is how we should declare our string :
-  ```
+  ```cpp
   char name[] = "void";
   name[2] = 'y';
   
@@ -401,7 +401,7 @@ void printString(const std::string& string){}
 	- `char32_t` : `const char32_t* name = U"void"; // don't forget to add that U`
 		- Which takes 4 bytes, made for `utf-32`
 - There is this library, that has some functions to make our lives easier :
-```
+```cpp
 #include <string>
 
 int main(){
@@ -413,7 +413,7 @@ int main(){
 }
 ```
 - if we wanna work with those other string data types this is how :
-  ```
+  ```cpp
   // wchar_t :
   std::wstring name = L"void"s + L"packet";
   // char16_t :
@@ -428,7 +428,7 @@ int main(){
 - It's a keyword we use to promise that our variable will always be constant
 - We can break that promise hhhhhhhh and bypass it just in real life (don't do that, Be a man of Honor)
 - Breaking the promise :
-  ```
+  ```cpp
   const int MAX_AGE = 90;
   const int* a = new int; // this is similar to this : int const* a = new int
   *a = 2; // THIS WILL GIVE US AN ERROR
@@ -452,7 +452,7 @@ int main(){
 -  The `const` Keyword in Classes (The "Read-Only" Promise)
 	- When you put `const` at the _end_ of a class method, you are making a promise to the compiler: **"This function will strictly read data. It will absolutely NOT change any variables inside this class."**
 	- Here is exactly how it looks in a Game Dev scenario:
-```
+```cpp
 class Player {
 private:
     int health = 100;
@@ -473,13 +473,13 @@ public:
 ```
 - Why do we even need this?
 	- Look back at the string notes where you wrote: ```
-```
+```cpp
 void printString(const std::string& string)
 ```
 
 - I noted that passing by **const reference** is the best way to avoid slow copies. But here is the catch: **When an object is marked as `const`, you are ONLY allowed to call `const` methods on it.**
 - Imagine we write a function to display our player's stats on the screen. To make it fast, we pass the Player by const reference:
-```
+```cpp
 void RenderPlayerStats(const Player& myPlayer) {
     // This works perfectly because GetHealth() promises not to change anything.
     int currentHP = myPlayer.GetHealth(); 
@@ -498,7 +498,7 @@ void RenderPlayerStats(const Player& myPlayer) {
 - It's a way for us to initialize `class member functions` in the `constructor`
 - So when we write a `class` and we add `members` to that class, we need a way to initialize them, usually done in the `constructor` 
 - There are 2 ways :
-```
+```cpp
 // 1. Usual way
 
 class Entity {
@@ -525,7 +525,7 @@ int main(){
 }
 ```
 
-```
+```cpp
 // 2. The C++ way
 
 class Entity {
@@ -554,7 +554,7 @@ int main(){
 - So why would we use it :  cause it doesn't look like we did much, 2 reasons :
 	1. Coding style, this is way cleaner : you can initialize the variables on top and the rest of code inside those `{}` 
 	2. ***MOST IMPORTANTLY*** : if we don't do it this way the `member variable` will be `constructed twice` : 
-```
+```cpp
 class Entity {
 private:
 	std::string m_Name; // the first time
@@ -569,7 +569,7 @@ public:
 # **How to create Objects**
 - So when we create a class and it's time to use it, we have to instantiate it, we have 2 choices and the difference between them is : `Which memory we'll be creating our object in ?` SO `THE STACK or THE HEAP` 
 - Stack Allocation :
-```
+```cpp
 #include <iostream>
 #include <string>
 
@@ -592,7 +592,7 @@ int main(){
 	- When we want the object to stay ALIVE outside the scope
 	- The size of the entity is too large or we have multiple entities ...
 - Heap Allocation :
-```
+```cpp
 #include <iostream>
 #include <string>
 
@@ -621,7 +621,7 @@ int main(){
 ## Implicit Conversion
 - Implicit means kind of not telling it exactly what to do, it just does automatically 
 - The compiler is allowed to perform ONE implicit conversion on your code
-```
+```cpp
 class Entity {
 private:
 	std::string m_Name;
@@ -645,7 +645,7 @@ int main() {
 ```
 - We can do that because `Entity` has a constructor that takes an `int` and an `string`
 - You can also do the same thing with functions that take `Entity` as a param
-```
+```cpp
 void PrintEntity(const Entity& entity) {
 	<code>
 }
@@ -658,7 +658,7 @@ int main() {
 - It's the opposite to implicit, gets called in front of a constructor
 - When called it says that this constructor has to be explicitly called so no `implicit conversions` 
 - Syntax :
-```
+```cpp
 class Entity {
 private:
 	std::string m_Name;
@@ -688,7 +688,7 @@ int main() {
 	- `,` and `()` can be an operator hhhhhh
 - Operator overloading : allowed to change the behavior of the operator in your program
 - Syntax :
-```
+```cpp
 <return_type> operator<symbol>( <params> ) {
 	<code>
 }
@@ -697,7 +697,7 @@ int main() {
 # The this keyword
 - It's only accessible to us with a `member funciton` : function that belongs to a class (method)
 - It's a POINTER TO THE CURRENT OBJECT INSTANCE THAT THE METHOD BELONGS TO
-```
+```cpp
 class Entity {
 public:
 	int x, y;
@@ -711,7 +711,7 @@ public:
 }
 ```
 - Another use case is passing `this` as to a function that takes `Entity` as a param inside the Object itself
-```
+```cpp
 void printEntity(Entity* e);
 
 class Entity {
@@ -733,7 +733,74 @@ void printEntity(Entity* e){
 ```
 - If that function takes Entity as a reference, we have to dereference `this` : `printEntity(*this);` 
 
-# Object Lifetime
-- So we have to understand how does variables live in the Stack so that we can write code that doesn't crash, then we can leverage it and do clever things
-- You can check the NOTES in my personal [assembly notes](https://github.com/VOIDPACKET-VP/VOIDPACKET-Web-Galaxies/blob/main/Galaxies/Defense-Galaxies/Reverse-engineering-Galaxy/Architecture-Galaxies/1001%20x86-64%20Assembly.md)
-- 
+# Smart Pointers
+- So remember the `new` and `delete` which allocates memory on the heap and then free that memory, Well `Smart Pointers` automate that process 
+- It's basically a wrapper around a normal pointer
+- So when you call it, it will allocate memory for you, and then depending on what type of smart pointer your using that memory will be freed at some point
+- TO WORK WITH THEM WE HAVE TO : import `#include <memory>` 
+## unique pointer
+- It's a scope pointer : when it goes out of scope it will call delete
+- You can't copy unique pointers, so only use them when you want a scoped pointer
+- SYNTAX :
+```cpp
+// New safer way (C++14)
+std::make_unique<Type>( <arguments> );
+
+// Old way (C++11 and later) 
+std::unique_ptr<Type> <name>(new Type( <arguments> ));
+```
+- To access it
+	- **Arrow operator:** `ptr->member` accesses a member of the object.
+	- **Dereference operator:** `*ptr` accesses the object itself.
+	- **Get raw pointer:** `ptr.get()` returns the underlying raw pointer without releasing ownership
+ - Because a `unique_ptr` cannot be copied, you must use `std::move()` to transfer ownership from one pointer to another. After the move, the original pointer becomes null.
+```cpp
+std::unique_ptr<int> p1 = std::make_unique<int>(10);
+std::unique_ptr<int> p2 = std::move(p1); // p1 is now null, p2 owns the data
+```
+
+## shared pointer
+- It's a bit hardcore cause it does some other stuff under the hood
+- They work via `Reference Counting` : it's a practice of where you keep track of how many references you have to your pointer, as soon as that count reaches 0 it gets deleted :
+	- So i create 1 shared pointer, then a second and copy it, now my count is 2, the moment the first dies my count goes down by 1 and so on
+- SYNTAX :
+```cpp
+std::make_shared<Type>(constructor_args);
+// or
+std::shared_ptr<int> ptr3(new int(100)); // but this requires two separate memory allocations.
+```
+
+## weak pointer
+- is a smart pointer that holds a non-owning reference to an object managed by a `std::shared_ptr` except the reference count doesn't go up
+- It's great when you don't want to take ownership of the entity, which means you can use for stuff like checking whether or not it's expired or not
+```cpp
+std::shared_ptr<int> shared = std::make_shared<int>(42); 
+std::weak_ptr<int> weak = shared; // Initialize from shared_ptr
+```
+
+
+> Always try to see if you can use `unique` pointers first, if not then move to `shared` pointers
+
+
+# Copying and Copy Constructors
+- Note that copying takes time and performance, so if all you need is to read or overwrite data, DON'T COPY, pass by const reference, or if you are finished with an object and need to transfer it to another part of the program, you can "move" it instead of copying, which is much faster
+- Whenever your using the `equal operator` your are copying, with pointers you're copying the memory address
+
+# The arrow operator
+- Syntax : `->` 
+```cpp
+class Entity {
+public:
+	void print() const { std::cout << "hello" << std::endl;}
+};
+
+int main() {
+	Entity e;
+	e.print();  // since it's not a pointer we use "."
+	
+	Entity* ptr = &e;
+	ptr->print();  // since it's a pointer we use "->"
+}
+```
+- We do that because we have to dereference it, it's a pointer so it's pointing to a memory address thus we can't access the `print` method, here is another correct syntax `(*ptr).print();` 
+- Since `->` is an operator, we can overload it's functionality

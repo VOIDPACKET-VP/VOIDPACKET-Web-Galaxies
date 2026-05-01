@@ -8,31 +8,44 @@
 	  3. Contains Metadata
 
 - Creating this `json` file is the first thing we do, we can use the command : `nmp init` , then answer some questions ( if you hit enter without entering something, it will use the default option )
-- When it's created, now instead of entering this : `node <file name>` in the terminal to run our code, we would use `npm start` 
+- The script start option is what allow us to : instead of entering this : `node <file name>` in the terminal to run our code, we would use `npm start` 
 
 ## HTTP Module
+- Remember we wanna create a server, to do that we use node's `HTTP module` 
 - To be able to import modules in `node` we need to add in the `package.json` this : `"type": "module"` .
 - Then we can import what we need using `import <what you want>` :
 	1. For our case (http) > `import http from 'http'` 
 - It is considered a best practice to include `'node:http'` to tell the app that we're looking for a **NODE Module** :
-	  - `import http from 'node:http'` 
+	- `import http from 'node:http'` 
 
 - We mainly we'll be using the `.createServer()` method from the HTTP Module, and it goes like this :
-	1. it takes a callBack function, which takes 2 params : `request` and `response`
+	1. it takes a callback function, which takes 2 params : `request` and `response`
 	2. The `response`  param exposes various methods to us, one of them is the `.end()` : which sends data over HTTP and then ends the response, it takes 3 params :
 		   1. The data
 		   2. An encoding type : the default is `utf8` 
 		   3. A callback function
 		Another method is the `.write()`, the difference between the `.write and .end` is that the `.end` also ends the request.
+	- If you use `.write` you have to pair it with a `.end` so that we close the request
 	- So to create a server we would do something like this :
-		`import http from 'node:http'`
-		`const PORT = 8000`   ***// We need to set up a PORT to listen to***
-		`const server = http.createServer((req, res) => {`
-		  `res.end('Hello from the server!')`
-		`})`
-		`server.listen(PORT, () => console.log(``server running on port: ${PORT}``))`  ***// and here is where we listen***
+```
+import http from 'node:http'
 
+const POST = 8000
+const server = http.createServer((req, res) => {
+	res.end('Hello from the server')
+})
 
+server.listen(POST, () => {
+	console.log('We are listening on PORT: ${PORT}')
+})
+```
+- When serving data, it has to be a `string` not `JSON` because HTTP is a protocol that transfers strings, and to convert data into `strings` we use `JSON.stringify( <what to convert> )`
+## The Request Object
+![[Screenshot 2026-04-30 184810.png]]
+- On top of this, it gives us access to the `url` property, which tells us what endpoint the client is trying to hit
+- SYNTAX : `req.url`
+- We also need to check the `method` : `GET, POST, DELETE etc.`
+- SYNTAX : `req.method`
 ## Content-Type
 - When sending data, specifying content type is very important.
 ### Types :
@@ -47,13 +60,50 @@
 
 - When sending data, we need to specify the status Code as well, we do that using the `statusCode` property on the `response` object : > `response.statusCode = 200`
 
+## Error Handling
+- We have to always assume something can go wrong like if the user didn't type the endpoint properly or he wants an endpoint that doesn't exist
+- EXAMPLE :
+```
+if (req.url === '/api' && req.method === 'GET') {
+    res.setHeader('Content-Type', 'application/json')
+    res.statusCode = 200
+    res.end(JSON.stringify(destinations))
+    
+  } else {
+  
+    res.setHeader('Content-Type', 'application/json')
+    res.statusCode = 404
+    res.end(JSON.stringify({error: "not found", message: "The requested route does not exist"}))
+```
+
+## Path params
+- Sometimes the user might need data that's in a very specific path (e.g. `/api/continent/asia`) so to check if the user entered the right path, filter our data and send it we do something like this :
+```
+if (req.url.startsWith('/api/continent') && req.method === 'GET') {
+    res.setHeader('Content-Type', 'application/json')
+    res.statusCode = 200
+    const wordAfterLastSlash = req.url.split('/').pop()
+    const desiredData = destinations.filter(location => location.continent === wordAfterLastSlash)
+    res.end(JSON.stringify(desiredData))
+}
+```
+
 ## Query parameters
 - It's what we add after the `url` and we initialize it with `?` then between each *key-value pair* we separate them with `&` : `/api?name=voidpacket&country=morocco` 
 - To construct them :
 	1. we make a new URL constructor (it takes 2 params : relative URL and base URL) which returns a URL object > `const urlObj = new URL(req.url, 'http://${req.headers.host}')` 
 
-	2. the `urlObj` now returns an object that has a key `searchParams` where it's value is : `{ 'name' => 'voidpacket', 'country' => 'morocco' }` , now this is not an object, so we have to make it an object, we do that using the `Object` class with the `fromEntries()` method : `const queryObj = Object.fromEntries(urlObj.searchParams)` 
+	2. the `urlObj` now returns an object that has a key `searchParams` where it's value is : `{ 'name' => 'voidpacket', 'country' => 'morocco' }` , now this is not an object, so we have to make it an object, we do that using the `Object` class with the `fromEntries()` method : 
+`const queryObj = Object.fromEntries(urlObj.searchParams)` 
+- It looks like this :
+![[Screenshot 2026-04-30 194726.png]]
+
 - We can use `urlObj.pathname` instead of `req.url` when we want to get the ***path stripped from the query params***
+- Something to keep an eye for is :
+	- When using `req.url` it will equal to everything starting from that `/` : so the endpoint plus the queries
+	- So if we wanna check just the endpoint we use the URL object's `pathname` property
+		- `urlObj.pathname`
+
 ## CORS
 - So by default browser use : **Same-origin policy** > requests can only be made to the same `protocol` ,`domain` and `port` as the one serving the web page. (BTW, this is happening by default)
 - But sometimes, things can get a bit complex, and so we need to override it (*Same-origin policy*), Therefor we use what's know as **Cross-origin resource sharing (CORS)** 
