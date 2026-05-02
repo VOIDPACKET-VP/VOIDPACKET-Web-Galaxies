@@ -124,7 +124,6 @@ if (req.url.startsWith('/api/continent') && req.method === 'GET') {
 	- And to top if off : ***YOU WON'T GET ANY ERRORS, YOU WILL GET UNEXPECTED BEHAVIOR*** 
 
 ## Reading and Serving Data
-
 - We will have to be *OS agnostic* : we need a solution that doesn't care about what operating system we're using.
 - In our case we will need to generalize the file paths so that our users can get there hands on the resources without any OS problems.
 ![[Screenshot 2026-05-01 191402.png]]
@@ -152,12 +151,44 @@ if (req.url.startsWith('/api/continent') && req.method === 'GET') {
 - We often see them in import statements
 
 ## Path Module
+- It will help us Join paths to create one path which will work on any supported OS
+- We will also use to extract file names and extensions
 - We import it using : `import path from 'node:path'` 
 - We use the `path.join()` method to join path segments into one path :
 	- `path.join(__dirname, 'public', 'index.html')` 
 - We can get hold of the file's extension using : `path.extname()` > this will help us specify the `Content-Type` for each file we want to send
+	- You will find yourself wanting to send files with different extensions, so here is a code snippet that will help you with choosing what Content-Type to serve :
+```js
+export function getContentType(ext) {
+   const types = {
+     ".js": "text/javascript",
+     ".css": "text/css",
+     ".json": "application/json",
+     ".png": "image/png",
+     ".jpg": "image/jpeg",
+     ".jpeg": "image/jpeg",
+     ".gif": "image/gif",
+     ".svg": "image/svg+xml"
+   }
+
+  return types[ext.toLowerCase()] || "text/html"
+}
+```
+- We will need to return something that's why :
+	- `types[ext.toLowerCase()] || "text/html"` 
+	- So `text/html` is the default Content-Type
+	- In production make sure the list has more Content-Types than needed just in case
+- Then in your `server.js` you can add this code inside the `const server:
+```js
+const pathToResource = path.join(
+    publicDir,
+    req.url === '/' ? 'index.html' : req.url)
+
+const ext = path.extname(pathToResource)
+const contentType = getContentType(ext)
+```
 ## File System Module (FS)
-- We import it using : `import fs from 'node:fs'` 
+- We import it using : `import fs from 'node:fs/promises'` 
 - Used to read file at a specified path 
 - Provides methods to interact with the file system of our OS :
 	1. Read files > `.readFile()`
@@ -171,6 +202,10 @@ if (req.url.startsWith('/api/continent') && req.method === 'GET') {
 	3. `import fs from 'node:fs/promises'`  `await fs.readFile(< pathToResource> , 'utf8')` > we use ***ASYNC/AWAIT*** (best method)
 	- ***NOTE*** : the encoding is *OPTIONAL* : 
 		- When we don't specify an Encoding type, the content sent is a ***BUFFER*** type which browsers can interpret correctly using the specified `Content-Type` , it is also recommended not to specify an encoding type and let `Node and the browser` take care of that
+
+## NOTE :
+- Remember when i said we need to handle errors, well when the user wants to navigate to a file we don't have one of the errors will get is `ENOENT` : `Error NO Entity` which is a clue that we need to serve the user with a `404` 
+	- So prepare a 404 page
 
 ## Sanitization
 - It's about sanitizing user input to prevent attacks like : `XSS, SQLi, SSTI etc.`
