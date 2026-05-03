@@ -804,3 +804,173 @@ int main() {
 ```
 - We do that because we have to dereference it, it's a pointer so it's pointing to a memory address thus we can't access the `print` method, here is another correct syntax `(*ptr).print();` 
 - Since `->` is an operator, we can overload it's functionality
+
+# Dynamic Arrays
+- **Containers and templates live inside `std`**.
+	- **Templates:** Most tools in the standard library are built as [class templates](https://www.google.com/url?sa=i&source=web&rct=j&url=https://learn.microsoft.com/en-us/cpp/standard-library/stl-containers?view%3Dmsvc-170&ved=2ahUKEwjPr_77i52UAxUigf0HHSIJF0EQy_kOegQIBxAC&opi=89978449&cd&psig=AOvVaw0lEwRC-Zd6r7myasoCodFV&ust=1777896835709000) so they can work with any data type.
+	- **Containers:** These are specific data structures like
+```cpp
+std::vector, std::list, or std::map
+```
+that are also defined inside the `std` namespace.
+- SYNTAX : 
+```cpp
+#include <vector>
+std::vector<type> <name>;
+```
+- These arrays can resize, you don't have to give it a size, here we will make our own data structures because these default ones are not fast etc. 
+- So how they work :
+	- So when you create it, it allocates some memory, once it's exceeded, it creates a bigger array somewhere else in memory, then copies the old one into the new one, and deletes the old one (so you can see why they're not fast)
+## Array Methods
+- `<array>.push_back(<what to push>)`
+- `<array>.clear();` 
+- `<array>.erase( <what to erase> );`  // it has to be an iterator
+	- `<array>.erase(<array>.begin() + 1);` to remove the second element
+- Iterate through it 
+``` cpp
+for (<type> <item> : <array>) {
+	<code>
+}
+
+// When the <type> is an Object it's better to pass it as reference
+
+for (<type>& <item> : <array>) {
+	<code>
+}
+```
+## Optimizing Dynamic Array
+- To Optimize anything you have to understand how it works and our Environment
+- So for Dynamic Array the reason why they're slow is because they have to reallocate and copy the old array, and here we'll be optimizing the `copying` part, so we need to understand when and how it happens
+```cpp
+#include <iostream>
+#include <vector>
+
+struct Vertex {
+	float x, y, z;
+
+	Vertex(float x, float y, float z) //constructor
+		: x(x), y(y), z(z) {
+	}
+
+	Vertex(const Vertex& vertex) // Copy constuctor so that we can know when the copying is called
+		: x(vertex.x), y(vertex.y), z(vertex.z) {
+		std::cout << "Copied" << std::endl;
+	}
+};
+
+int main() {
+	std::vector<Vertex> vertices;
+
+	vertices.push_back({ 1,2,3 });
+	vertices.push_back({ 4,5,6 });
+	vertices.push_back({ 7,8,9 });
+
+	return 0;
+}
+```
+- Now when we run this code C++ copies 6 times (terminal result) :
+![[Screenshot 2026-05-03 144045.png]]
+- If we put a breakpoint at the first `push_back()`, The first copying has already happened, WHY ?
+	- That's because when we construct our object, it gets constructed in the `Stack frame` of the `main` function, then we copy it to the memory the vector has allocated, THAT'S THE FIRST THING WE CAN OPTIMIZE 
+		- So we construct it directly in the allocated memory
+- When we hit `F10` again (the second `push_back()` has executed) we get 2 `copies`, one is normal because we pushed something, but the second ??? 
+	- That's because the default size is `1 Vertex` so every time we push the capacity is full, SO IF WE KNOW HOW MANY VERTEXES WE'LL HAVE THEN WHY NOT TELL IT TO ALLOCATE FROM THE BEGINNING ENOUGH FOR 3 VERTEXES, That's the second optimization, and the way to do that, is after creating the Dynamic array we add this 
+```cpp
+<array>.reserve( <how much we want> );
+```
+- ONE THING TO NOTE :
+```cpp
+std::vector<Vertex> vertices(3);
+//is different from :
+vertices.reserve(3);
+
+// The first one constructs 3 Objects, and the second one makes space for 3 objects
+```
+- Now if we compile we only get 3 copies
+![[Screenshot 2026-05-03 145705.png]]
+- But we can do better, Remember the First Optimization, we can achieve that by using `emplace_back();` instead of `push_back();`
+```cpp
+vertices.emplace_back(1, 2, 3);
+```
+- USING That, now when we run the code we will get 0 copies
+
+# Local Static
+- You might wanna check the section about [static](#**Static**) 
+- Setting static var in a local scope is like having a global variable but only the parent of that scope can access it
+```cpp
+#include <iostream>
+
+void Function() {
+	int i = 0;
+	i++;
+	sdt::cout << i << std::endl;
+}
+int main() {
+	Function();
+	Function();
+	Function();
+	Function();
+	Function();
+	
+	return 0;
+}
+
+// This will result in :
+// 1
+// 1
+// 1
+// 1
+// 1
+// That's because we are declaring a new i every time we call Function()
+
+
+// But if we declare i as static
+void Function() {
+	static int i = 0;
+	i++;
+	sdt::cout << i << std::endl;
+}
+
+// This will result in :
+// 1
+// 2
+// 3
+// 4
+// 5
+```
+
+# Libraries
+- We have `Static linking` and `Dynamic Linking`, you should use `static` whenever you can
+- **Software Distribution**: You must decide whether to ship a single "fat" executable (static) or an executable accompanied by `.dll` or `.so` files (dynamic). Static linking makes your app self-contained and easier to distribute, while dynamic linking requires ensuring the user has the correct library versions installed.
+- **Memory and Storage Efficiency**: Dynamic linking allows multiple programs to share one copy of a library in memory, saving system resources
+## Static Linking
+- It happens at Compile time
+- When using libraries, we have to point our compiler to the `header` file so that it knows what functions we have, and our linker to the `lib` file so we get those functions definitions
+- So what you do : 
+	- Preparation > inside your project :
+		1. Create a `Dependencies` folder
+		2. Inside it create a folder, give it a `<name>` (same as the library your using)
+		3. Then from the library folder you downloaded, copy the `lib` and `include` folders into the `<name>` folder
+	- Linking `include folder` > Inside Visual Studio
+		1. Right click your project > properties > C/C++ > General > Additional include directories 
+			- `$(SolutionDir)Dependencies\<name>\<include folder>`
+	- Linking `lib folder` > Inside Visual Studio
+		1. Right click your project > properties > Linker > General > Additional include directories 
+			- `$(SolutionDir)Dependencies\<name>\<lib folder>`
+		2.  Linker > Input > Additional Dependencies 
+			- Add the name of the `lib file` `;`  (e.g. `glfw3.lib;`)
+- That's it, now we can include the library
+## Dynamic Linking
+- It happens at run time
+- So the only difference from static linking when it comes to setup is Linking `lib folder`
+	- Instead of the normal `.lib` file, we add the `dll` version
+	- So you will find in the `lib folder` 2 `dll` files :
+		- One's extension is `.dll` (e.g. `glfw3.dll`) 
+		- Second's extension is `.lib` but it has `dll` in the name (e.g. `glfw3dll.lib`)
+			- This is the one you wanna add to the Additional Dependencies section
+		- Then Copy the `.dll` file into the same directory as the `.exe` 
+	- The difference between the `.dll` and the one that has `dll` in the name is that the later is just a series of pointers to the what's in the `.dll` file
+## Making and Working with Libraries
+- [Watch this video by The Cherno](https://youtu.be/Wt4dxDNmDA8?si=h_TeNXhcd9A7o_OH)
+
+# How to deal with Multiple return values
