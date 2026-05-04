@@ -50,5 +50,87 @@
 - We don't rely on third parties
 - We will have to deal with everything
 
-
 # ***Intro To SQL***
+- All goes in a `.sql` file usually named `query.sql`
+## Commands
+### SELECT
+- used to select data 
+	- `SELECT * FROM <table_name>;` 
+		- The `*` signifies `all` 
+- You can also retrieve only desired columns
+	- `SELECT <column>, <column> FROM <table_name>;`
+### WHERE clause
+- Used to filter results
+- NOTE :  we can write in multiple lines, indentation is used to make things clean, just remember the `;` at the end of the query
+- SYNTAX : `SELECT <something> FROM <table> WHERE <something> = '<condition>';`
+```sql
+// EXAMPLE
+SELECT brand, model, condition, price FROM cars
+	WHERE condition = 0;
+```
+- You can also do `> < >= <= !=`  
+### NOT and LIKE
+- Used to get a match, this is achieved by matching by multiple characters or a single char
+	- Multiple : `%<match>%`
+	- Single : `_`
+```sql
+// EXEMPLE WITH %
+SELECT brand, model, color, year FROM cars
+  WHERE color LIKE '%green%';
+  
+// EXAMPLE WITH _
+SELECT brand, model, color, year FROM cars
+  WHERE model LIKE 'DB_';
+```
+- We achieve the opposite by adding `NOT`
+	- `WHERE color NOT LIKE '%green%';` 
+### AND
+```sql
+SELECT brand, model, color, year FROM cars
+  WHERE color NOT LIKE '%green%'
+  AND model LIKE 'DB_'
+  AND year > 1964;
+```
+### BETWEEN
+- Used to set a range
+```sql
+SELECT brand, model, year, price FROM cars
+  WHERE year BETWEEN 1980 AND 1989;
+```
+### OR
+```sql
+SELECT brand, model, condition, price FROM cars
+  WHERE price < 250000
+  OR brand = 'Porsche';
+```
+
+- THINGS TO NOTE :
+```sql
+// This 
+SELECT brand, model, condition, price FROM cars
+  WHERE price < 250000
+  OR brand = 'Porsche'
+  AND condition > 3;
+// is as if we said 
+SELECT brand, model, condition, price FROM cars
+  WHERE price < 250000
+  OR ( brand = 'Porsche'
+  AND condition > 3 ); 
+```
+- So be careful with brackets
+- Also when you wanna check something's value if it's `FALSE or TRUE` (Boolean) it's better to use `IS` instead of `equal` 
+```sql
+SELECT brand, model, color, year, price, sold FROM cars
+  WHERE (color LIKE '%red%'
+  OR year BETWEEN 1960 AND 1969)
+  AND sold IS FALSE;
+```
+
+### IN 
+- To look for multiple values within a column
+- SYNTAX : `IN ('', '', '');`
+```sql
+SELECT brand, model, price, sold FROM cars
+  WHERE brand IN ('Ford', 'Chevrolet', 'Ferrari')
+  AND sold IS FALSE;
+```

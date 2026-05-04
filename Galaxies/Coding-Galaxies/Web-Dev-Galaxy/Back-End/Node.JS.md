@@ -204,9 +204,10 @@ const contentType = getContentType(ext)
 		- When we don't specify an Encoding type, the content sent is a ***BUFFER*** type which browsers can interpret correctly using the specified `Content-Type` , it is also recommended not to specify an encoding type and let `Node and the browser` take care of that
 
 ## NOTE :
-- Remember when i said we need to handle errors, well when the user wants to navigate to a file we don't have one of the errors will get is `ENOENT` : `Error NO Entity` which is a clue that we need to serve the user with a `404` 
+- Remember when i said we need to handle errors, well when the user wants to navigate to a file we don't have, one of the errors will get is `ENOENT` : `Error NO Entity` which is a clue that we need to serve the user with a `404` 
 	- So prepare a 404 page
-
+- When we are sending data to the server, they are sent in `chunks` so to get hold of them you might use a for loop, just remember this process is `async` so the syntax : `for await (const chunk of req) {}`
+	- Node by default separates the headers ... and body of a request, so when you say `req` you'll get the body, but if you say `req.url` you get the `URL` 
 ## Sanitization
 - It's about sanitizing user input to prevent attacks like : `XSS, SQLi, SSTI etc.`
 - We'll be using a dependency in the `npm package` called [sanitize-html](https://www.npmjs.com/package/sanitize-html) 
@@ -224,7 +225,8 @@ const contentType = getContentType(ext)
 	2. Create the emitter > `const eventToEmit = new EventEmitter()`
 	3. Define the listener function
 	4. Register the listener > `eventToEmit.on( <name of the event> , <function defined in step 3>)`
-	5. Emit the event > `eventToEmit.emit( <name of the event> , <params to pass to the function that will be triggered>)`
+	5. Emit the event (this is what triggers everything) > `eventToEmit.emit( <name of the event> , <params to pass to the function that will be triggered>)`
+- The best thing about them, is the fact that they are Modular, which means we can have our emitter in a file and listen to it in another file, which helps with scaling
 
 ## Server-Sent Events (SSE)
 - Provide a constant stream of data to a client.
@@ -256,7 +258,8 @@ const contentType = getContentType(ext)
 				`eventSource.onerror = () => {`
 					`console.log('Connection failed...')`
 				`}`
-
+- This is something i can use in Portal :
+	- Showing the new games that are published, Hot news etc.
 ## Nodemon :
 - [Nodemon](https://github.com/remy/nodemon#nodemon) is a package that does the process of : `edit > save > restart the server to see results` for us .
  - To install it, in our project in the terminal we enter : `npm insatll --save-dev nodemon`
@@ -265,6 +268,6 @@ const contentType = getContentType(ext)
 		 - We have to add : `"dev": nodemon server.js`
 	- NOW we can start the app with : `nodemon server.js` or `npm run dev` 
 - Also remember that :
-	1. Nodemon is made for ***server files*** and ***node.js*** 
-	2. It's only for development
-	3. It's configurable 
+	1. Nodemon is made for ***server/backend files*** and ***node.js*** 
+	2. It's only for development not production
+	3. It's configurable : so we can set it to watch also some DB files, or if we're working with Typescript we can watch it's files etc.
