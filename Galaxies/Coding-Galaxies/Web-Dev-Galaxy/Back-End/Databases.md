@@ -134,3 +134,40 @@ SELECT brand, model, price, sold FROM cars
   WHERE brand IN ('Ford', 'Chevrolet', 'Ferrari')
   AND sold IS FALSE;
 ```
+
+### ORDER BY
+- Allows us to sort our results using different columns
+	- The default sorting for strings is from A-Z, and it's ascending for Numbers : `ORDER BY <column>;`
+	- We can reverse the sorting by adding `DESC` : `ORDER BY <column> DESC;`
+- We can have multiple `columns`, the sorting starts with the first column then sorts using the second column and so on
+	- `ORDER BY brand DESC, year;` 
+```sql
+/*
+  Select the brand, model, condition and price from cars
+    order the table by condition in descending order
+    and by price in ascending order
+*/
+
+SELECT brand, model, condition, price FROM cars
+  ORDER BY condition DESC, price;
+```
+- You can add the `WHERE clause` before the `ORDER BY`
+```sql
+SELECT brand, model, condition, price FROM cars
+  WHERE sold IS FALSE
+  AND condition != 5
+  ORDER BY condition DESC, price;
+```
+
+### LIMIT
+- Allows us to select a number of records 
+```sql
+SELECT brand, model, color, price FROM cars
+  WHERE color LIKE '%red%'
+  AND sold IS FALSE
+  ORDER BY price
+  LIMIT 5;
+```
+
+### Aggregations
+- Allow us to turn values of a column to a single value
