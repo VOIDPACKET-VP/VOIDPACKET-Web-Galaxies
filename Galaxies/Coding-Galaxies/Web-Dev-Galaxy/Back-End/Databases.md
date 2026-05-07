@@ -169,5 +169,129 @@ SELECT brand, model, color, price FROM cars
   LIMIT 5;
 ```
 
-### Aggregations
+### Aggregations : 
+#### COUNT and SUM
 - Allow us to turn values of a column to a single value
+- SYNTAX : `COUNT(<COLUMN>)` and `SUM(<COLUMN>)`
+```sql
+SELECT COUNT(*) AS total_sold FROM cars
+  WHERE sold IS TRUE;
+  /*
+ Result
+|index|total_sold |
+|  0  | 19        |
+  */
+```
+- NOTE : `AS total_sold` is optional, it's like giving it a name
+```sql
+SELECT SUM(price) AS total_earnings FROM cars
+  WHERE sold IS TRUE;
+```
+
+#### MAX, MIN and AVG
+- You can understand what they do from their name
+- SYNTAX : same as `COUNT`
+
+> We can FLOOR or CEIL our results if they were numerical:
+> FLOOR(MAX(price))
+
+#### GROUP BY
+- Well we group by something hhhhhhh
+```sql
+SELECT brand, COUNT(brand) AS brand_count FROM cars
+  GROUP BY brand;
+```
+
+```sql
+/*
+  Select:
+    * the brand
+    * a count of the brand
+    * and an average of the price for each brand
+    * round the average down to the nearest number
+    * alias the average as 'AVG' in your output
+  From cars where
+    the car has not been sold
+  Group the table by brand.
+*/
+
+SELECT brand, COUNT(brand), FLOOR(AVG(price)) as AVG FROM cars
+  WHERE sold IS FALSE
+  GROUP BY brand;
+```
+
+#### HAVING
+- Allows us to add conditions for our aggregations
+```sql
+/*
+  Select:
+    * the brand
+    * a count of the brand
+    * and an average of the price for each brand
+    * round the average down to the nearest number
+    * alias the average as 'AVG' in your output
+  From cars where
+    the car has not been sold
+  Group the table by brand.
+  Show results where the count is > 1
+*/
+
+SELECT brand, count(brand), FLOOR(AVG(price)) AS AVG
+  FROM cars
+  WHERE sold IS FALSE
+  GROUP BY brand
+  HAVING count(brand) > 1;
+```
+
+### Challenge
+```sql
+/*
+  Select:
+    * year
+    * a count of cars from that year, aliased as car_count
+    * the maximum price
+    * the minimum price
+  from the table cars
+    where the car has been sold
+  group by year
+    only show years where more than one car has been sold from that year
+  order the result by car_count
+*/
+
+SELECT year, COUNT(year) as car_count, MAX(price), MIN(price) FROM cars
+  WHERE sold IS TRUE
+  GROUP BY year
+  HAVING COUNT(year) > 1
+  ORDER BY car_count;
+```
+
+> GROUP BY and HAVING have to come before ORDER BY
+
+## Manipulating Data
+- These operations are known ad `DATA MANIPULATION LANGUAGE (DML)` or `CRUD Commands` : Create, Read, Update, Delete
+
+> DML commands don't return data from the db
+
+### INSERT INTO
+- It's best to write into every column, this makes us avoid null values in our columns
+- SYNTAX : `INSERT INTO <table> (<columns to write to>) VALUES (<values for each volumn respectively>), (<another set of values if any>), (<and so on>);` 
+
+### UPDATE
+- It's best to be specific as possible, so adding conditions is a good idea
+- SYNTAX : `UPDATE <table> SET <column> = <value>, <column> = <value>`
+```sql
+UPDATE cars SET
+  condition = 5,
+  price = 465000
+WHERE
+  id = 14;
+```
+
+### DELETE
+- SYNTAX : `DELETE FROM <table> WHERE <condition>`
+```sql
+DELETE FROM cars
+	WHERE condition = 0;
+```
+
+# Creating and Joining Tables

@@ -53,4 +53,126 @@
 
 > modern data centers are built to optimize east-west traffic, not just user-to-server traffic. And that's why spine-leaf became the standard.
 
-# WAN
+# WAN (Wide Area Network)
+- People think it's the internet, but that's not always the case, but it's just the stuff that connects your separate locations across distance
+	- Connecting the office to data center etc.
+- When talking about one contained location, that's `LAN (Local Area Network)`
+
+> A WAN isn't just about connecting places. It's about connecting business functions that happen to live in different places.
+
+## MPLS : Multiprotocol Label Switching
+- It's not the public internet. It is a provider-managed private WAN service. Often called private and secure
+- How it works : 
+	- I call the provider and say, "I want all my sites connected privately," and they say, "Cool, plug into our network and we'll handle the magic in the middle."
+- MPLS is a `Layer 2.5` technology : sits between normal data link behavior and normal Layer 3 routing behavior.
+
+> Something to remember if you're heading the Cisco path : CE router (customer edge) and PE router (provider edge)
+
+## Metro Ethernet
+- It's Fast, low latency, it's `layer 2`.
+- How it works :
+	- "Hey provider, I want a blazing fast connection between these two sites in the same metro area." And they give you one. Often Fiber, often used between corporate office and data center or between 2 data centers
+- Types :
+	1. E-Line: point-to-point
+	2. E-LAN: multipoint
+	3. E-Tree: hub-and-spoke
+
+> **REAL WORLD TIP:** If you're trying to decide between MPLS and Metro Ethernet, start with the business need, not the technology label. If the goal is high-speed connectivity between major sites like corporate and a data center, Metro Ethernet often makes a ton of sense. If the goal is connecting many branches privately through a carrier, MPLS has historically been the better fit.
+
+## When WAN is the internet
+- So instead of paying for private carrier WAN services, you pay for regular business internet connections and build a `site to site VPN` : traffic is encrypted between locations as it crosses the wild internet
+- It's cheaper but it's unpredictable, jittery..., the traffic will be treated rudely
+- Comes the `SD-WAN` : allows intelligent use of regular internet connections, improves path selection, performance and cloud access where most of our data center live
+
+> So as a recap for WAN : it means the connectivity between our separate locations. Sometimes that is private carrier infrastructure like leased lines, MPLS, or Metro Ethernet. Sometimes it's the public internet with VPNs on top. The right answer depends on cost, performance, geography, and what our business actually needs
+
+# Let's hack your home network
+- Most home networks are what we call `SOHO Network` : a setup where one device does everything
+- So you always want to ask yourself these questions:
+	- can someone attack you from the internet?
+	- can one of your internal devices become the weak link?
+	- is your wireless network easy to abuse?
+	- how are you connecting back to your company if you're working from home?
+- The first is the most obvious, the ISP gives your router a `Public IP Address` : that's what the internet sees, it's how traffic finds its way back to your network.
+	- If someone knows that address, they can prob it, check for open ports (`nmap`), look for vulns to exploit
+	- You can test this yourself BTW
+
+> **REAL WORLD TIP:** If you're testing your public IP from the outside, do it from a cloud server or another network, not from inside your own LAN. You want to see what the internet sees. And if you find open ports you don't recognize, don't "investigate later." Close them now, then figure out what broke afterward.
+
+## Upgrade the router you have
+- You don't need to buy new gear now, but we can make our router lot safer, not perfect but better
+	- Check the Firewall is enabled
+	- Turn off port forwarding unless you absolutely know why it's there
+	- Disable **remote management** : let's people try to log in to your router from the internet
+	- change the default admin username and password
+	- update the **firmware** : router's OS
+	- If wireless : Use WPA2 at minimum, or WPA3 if your gear supports it.
+		- Change the default **SSID** : wireless network name
+	- Disable `ping` : If your router has an option to stop responding to WAN pings, disable it.
+	- `IoT` devices are also a pain in the *** , so use `Segmentation` : 
+		- Trusted devices in one network, IoTs on another, Put guest devices on another
+	- If your gear supports **VLANs** (`virtual network separations`) use them
+	- It it supports client isolation use it
+- If your gear isn't enough, then it's time for an upgrade, you'll get access to :
+	- better firewall policies, VLAN support, traffic visibility, VPN options, and in some cases **IDS/IPS**. That's Intrusion Detection System and Intrusion Prevention System, which means your network can actually inspect traffic for known threats and sometimes block them automatically.
+- Use a VPN (`Virtual Private Network`) if you work from home
+	- It works by creating an encrypted tunnel between you and the destination network (your company)
+
+# Hybrid Cloud
+- The idea is knowing what belongs in the cloud what belongs in your own data center (on-prem), and how to make those 2 worlds work together
+## On-prem vs Cloud
+- The upside of `On-prem` is control, your hardware, your rules etc. the Downside is price
+- Cloud: you rent someone else's infrastructure, and stop when you don't need them, so it's flexible and cheaper
+
+> Remember what we said in the beginning, it's about pairing the technical problem with the right home
+
+# Ethernet Cables
+- So if you're working towards CCNA, knowing how to make one, and understanding what's happening inside matters
+- WHY ? in the real world You're making them because you need a custom length, or because a cable run got damaged
+- So what do you need :
+	- Ethernet Cable : Cat5e UTP
+	- RJ45 connector
+	- Crimping tool
+	- Cable tester
+
+> **REAL WORLD TIP:** In the job world, I almost always prefer buying pre-made patch cables when I can. They’re cleaner, more reliable, and save time. But when you’re doing structured cabling through walls or ceilings, you absolutely need to know how to terminate your own ends, and you definitely want a cable tester nearby to save yourself from insane troubleshooting later.
+
+- We start with stripping the sheath : outer jacket of the cable
+	- Don't nick the copper inside, you'll face a big problem
+
+## What's inside it
+- You'll find 4 twisted pairs : 8 copper wires, they're twisted because it helps fight 2 things :
+	1. **Electromagnetic** **interference** (EMI)
+	2. Crosstalk
+- It's why they're called `UTP` unshielded twisted pairs. In places where there is a ton of electrical noise, you might use `STP` shielded twisted pairs
+
+## Straight through VS Crossover
+- Devices like PCs used to send traffic on specific pins and receive on others, Switches were designed to complement that, That's why a straight-through cable worked when connecting a PC to a switch.
+	- One side talks, the other listens
+- But when you connect a PC to a PC or Switch to Switch, they were both talking on the same pins and listening on the same pins. Nobody was hearing anybody. 
+- That’s where a `crossover cable` came in, swapping the transmit and receive pairs so the conversation could actually happen.
+
+> NOTE : With modern gigabit Ethernet, devices commonly support **Auto-MDIX**, which is basically smart enough to figure all that out automatically and adjust the pins for you.
+> So Crossover cables don't matter as much now
+
+## The Pinout You need to know
+- When it's time to build the cable, you can use the `T568B` standard : the common pinout for straight-through cables. NOTE > You'll need to memorize the order of wire colors :
+	1. White orange
+	2. Orange
+	3. White green
+	4. Blue
+	5. White blue
+	6. Green
+	7. White brown
+	8. Brown
+
+## The Other steps of the process
+1. Untwist the pairs
+2. straighten the wires 
+3. arrange them in the correct order 
+4. trim them evenly
+5. slide them into the RJ45 connector with the clip facing down, and crimp. 
+6. Then do the exact same thing on the other end for a straight-through cable.
+7. Test it using a cable tester : If the tester lights up pins 1 through 8 in order on both ends, you did it!
+
+> Standard copper Ethernet runs top out at 100 meters. Go longer than that, and your signal starts degrading.
