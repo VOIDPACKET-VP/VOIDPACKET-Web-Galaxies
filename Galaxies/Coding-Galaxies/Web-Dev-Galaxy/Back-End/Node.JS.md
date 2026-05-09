@@ -262,7 +262,7 @@ const contentType = getContentType(ext)
 	- Showing the new games that are published, Hot news etc.
 ## Nodemon :
 - [Nodemon](https://github.com/remy/nodemon#nodemon) is a package that does the process of : `edit > save > restart the server to see results` for us .
- - To install it, in our project in the terminal we enter : `npm insatll --save-dev nodemon`
+ - To install it, in our project in the terminal we enter : `npm install --save-dev nodemon`
  - NOTE : 
 	 - We will need to modify `scripts` in the `package.json` file :
 		 - We have to add : `"dev": nodemon server.js`
