@@ -410,6 +410,8 @@ SELECT brand, model, price, sold, sold_price
   
   /*We used an alias for sold_cars and cars : SC and C
 So instead of typing sold_cars you type SC
+
+When adding the alias you must use it
   */
 ```
 ![[Screenshot 2026-05-09 202651.png]]
@@ -424,6 +426,48 @@ So instead of typing sold_cars you type SC
 ALTER TABLE staff
 ALTER COLUMN dealership_id DROP NOT NULL;
 ```
-
 #### FULL and INNER
 - It's pretty similar to LEFT and RIGHT
+
+## Joining Multiple Tables
+- We achieve that by chaining `JOIN clauses`, They kind of work like those `.then` blocks , what's returned from the previous one gets passed to the next one
+
+```SQL
+/*
+  Select the name, role and city from sold_cars
+  Join with the staff and dealerships tables
+    use appropriate joins to show staff who have no dealership_id
+  Include a where clause to find
+    - null values in sold_cars
+    - staff who have the role 'Salesperson'
+*/
+
+SELECT S.name, S.role, D.city FROM staff S
+  LEFT JOIN sold_cars SC ON SC.seller = S.id
+  LEFT JOIN dealerships D ON S.dealership_id = D.id
+  WHERE S.role = 'Salesperson'
+  AND (S.dealership_id IS NULL AND SC.id IS NULL)
+  ;
+```
+
+> TIP FROM ME HHHHHH : So if you want to join tables you have to think about which tables is connected to which table, which means you can't join tables because you want to, if 2 tables you want to join don't have a relation you need to find a table that they both have a relation with : it will act as your bridge
+
+# SQL Injections 
+ - We can protect against this by using `parameterization` when we build our queries 
+ - Here you can see the Five ways to prevent it
+ ![[Screenshot 2026-05-10 190723.png]]
+
+## Parameterization
+- We are treating our queries as two separate threads :
+	- `SQL`
+	- `Data`
+- The params are not interpreted as SQL and the SQL is parsed with placeholder values
+
+## ORMs
+- Allow us to translate data into objects before passing them to the Db
+
+## Sanitizing input
+- Similar strategy as preventing against XSS, you can use libraries etc.
+
+## WAF
+- They identify and block common SQLi patterns
