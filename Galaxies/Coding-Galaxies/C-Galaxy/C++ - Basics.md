@@ -389,7 +389,7 @@ void printString(const std::string& string){}
   
   and not like this :
   char* name = "void"; // this is because we are trying to overwrite something that's stored in a READ ONLY space in memory
-  Also if we want to declare it with a * it's better to add the const :
+  // Also if we want to declare it with a * it's better to add the const :
   const char* name = "void"; 
   // But REMEMBER string literals are always stored in READ ONLY memory
   ```
