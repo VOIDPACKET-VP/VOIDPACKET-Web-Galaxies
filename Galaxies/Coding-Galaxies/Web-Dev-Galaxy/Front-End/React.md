@@ -103,3 +103,101 @@ root.render(
 
 > NOTE : when you want to render more than one element you must wrap them in a parent element : a div, a main whatever works.
 
+# Fragment
+- Remember the last note ^^^
+- Well instead of adding a useless parent element what we can do is use `Fragments` they act the same way, the have the same purpose but when react sees them it doesn't create a useless HTML element
+```jsx
+import { Fragment } from "react"
+
+function Page() {
+    return (
+        <Fragment>
+            <header>
+                <img src="react-logo.png" width="40px" alt="React logo" />
+            </header>
+            <main>
+                <h1>Reason I am excited to learn React</h1>
+                <ol>
+                    <li>React is a popular library so I will be able to fit in with all the coolest devs out there! 😎</li>
+                    <li>I am more likely to get a job as a front end developer if I know React</li>
+                </ol>
+            </main>
+            <footer>
+                <small>© 2024 Ziroll development. All rights reserved.</small>
+            </footer>
+        </Fragment>
+    )
+}
+
+root.render(
+    <Page />
+)
+```
+- See those `<Fragment>` tags !!
+- Another way is to not import them and instead of `<Fragment>` we use empty tags `<> </>`  
+
+- In JSX, when we want to add a class for our element we don't do it like you would normally `class=""` but like this :
+	- `className=""`
+
+> Something you will start to do is : put each Component you make in it's own .jsx file, this way you won't clutter your main .jsx file (App.jsx) which gets imported to index.jsx to get rendered, then all you have to do is import and export it
+
+
+# Props
+- They are similar to function arguments, they help with composability
+- EXAMPLES : YT videos (how they appear) that's something that's achieved with components and props : same structure different data
+
+> NOTE : if you have variables and you want to include them in your JSX, you will have to put them inside {}, unlike JS where you put them inside ${}
+
+## How to pass data (props)
+- The way to do it is very simple, when you call the component `<Component />` you add your data like HTML attributes
+```jsx
+<Contact
+	img="./images/mr-whiskerson.png"
+	name="Mr. Whiskerson"
+	phone="(212) 555-1234"
+	email="mr.whiskaz@catnap.meow"
+/>
+```
+
+## How to receive that data (props)
+- In your component (the function declaration) you add one argument : after all props are equal to arguments (to my understanding) 
+```jsx
+function Contact(props) {
+}
+```
+
+> Note if you log `props` you will get an object that has all of those prop data
+
+```jsx
+{img: './images/felix.png', name: 'Felix', phone: '(212) 555-4567', email: 'thecat@hotmail.com'}
+```
+
+- Now if you wanna use that data inside your `JSX` you have to do it like this 
+	- e.g. `{props.img}`
+
+## Destructuring props
+- So props is an Object thus we can Destructure it
+```jsx
+const props = {
+img: './images/felix.png', name: 'Felix', phone: '(212) 555-4567', email: 'thecat@hotmail.com'
+}
+
+const {img, name} = props
+```
+
+- This means we can destructure it inline 
+```jsx
+function Contact({img, name, phone, email}) {
+	return (
+		<h1>{name}</h1> //instead of {props.name}
+	) 
+}
+```
+
+### Non string props
+- When your prop is not a string, you can use the `{}` 
+```jsx
+<Contact 
+	phone={44651651561} 
+/>
+```
