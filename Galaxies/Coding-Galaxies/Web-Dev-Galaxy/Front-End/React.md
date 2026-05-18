@@ -201,3 +201,65 @@ function Contact({img, name, phone, email}) {
 	phone={44651651561} 
 />
 ```
+
+
+## React can render arrays
+- We use the `.map()` method to well loop through the array and edit it, pass it to the component and render the component
+```jsx
+// We have imported this array :
+/*
+export default [
+    {
+        question: "I got my daughter a fridge for her birthday.",
+        punchline: "I can't wait to see her face light up when she opens it."
+    },
+    {
+        question: "How did the hacker escape the police?",
+        punchline: "He just ransomware!"
+    },
+    {
+        question: "Why don't pirates travel on mountain roads?",
+        punchline: "Scurvy."
+    },
+    {
+        question: "Why do bees stay in the hive in the winter?",
+        punchline: "Swarm."
+    },
+    {
+        question: "What's the best thing about Switzerland?",
+        punchline: "I don't know, but the flag is a big plus!"
+    }
+]
+*/
+
+
+export default function App() {
+    const jokeElements = jokesData.map((joke) => {
+        return <Joke  
+            setup={joke.setup}
+            punchline={joke.punchline}
+        />
+    })
+    return (
+        <main>
+            {jokeElements}
+        </main>
+    )
+}
+```
+
+# Key prop
+- Allows React to keep track of what data is this, and the order etc.
+	- If you ever added functionality like deleting a post, adding it etc. React need that Key prop to keep track 
+- so anytime you're transforming an array of data into an array of props you have to add a key prop
+- SYNTAX :
+```jsx
+<Contact 
+	key={somethingUnique}
+/>
+```
+- It can be anything as long as it is unique to that exact instance
+
+> Beginners will tend to use the index from .map() but it's generally a bad idea
+
+> Note : there other ways to pass an object as a prop : `obj={myObject}` or `{...myObject}` just remember that you're prop naming must be the same as the naming in the object for this to work
