@@ -263,3 +263,250 @@ export default function App() {
 > Beginners will tend to use the index from .map() but it's generally a bad idea
 
 > Note : there other ways to pass an object as a prop : `obj={myObject}` or `{...myObject}` just remember that you're prop naming must be the same as the naming in the object for this to work
+
+# Event listeners
+- In normal JS you would use the `.addEventListener()` method, or add an attribute like `onclick="function()"` in the HTML element.
+- Well in react we do things by passing it as an attribute in the JSX:
+```jsx
+function App() {
+  function handleClick() {
+    console.log("I was clicked!")
+  }
+  function handleMouseOver() {
+    console.log("I was hovered!")
+  }
+  return (
+    <main className="container">
+      <img
+        src="https://picsum.photos/640/360"
+        alt="Placeholder image from Picsum"
+        onMouseOver={handleMouseOver}
+      />
+      <button onClick={handleClick}>Click me</button>
+    </main>
+  )
+}
+```
+
+# State
+- So props are what we pass to a Component, they are `immutabel : can't modify them` 
+- State on the other hand, They are values managed by the component : like variables declared inside a function
+	- So if we have changing values that can be saved/displayed we use `State`
+
+> The view (what you see on the page) is just a function that react gets to render, react re-renders it only if something changes 
+
+> Also as i said it's similar in theory to function variables but not in practice
+- We have first import it, then we use `React.useState()`
+	- If you log it you will get an array where the first value is `undefined` and second is a function
+
+- SYNTAX :
+```jsx
+import React from "react"
+
+export default function App() {
+    const result = React.useState("Yes")
+    
+    console.log(result) // ['Yes', f()]
+    return (
+        <main>
+           <h1 className="title">Is state important to know?</h1>
+            <button className="value">{result[0]}</button>
+        </main>
+    )
+}
+```
+- Since `{result[0]}` doesn't look good, what we do is use Destructuring
+```jsx
+let [result, func] = React.useState("Yes")
+
+// Now we can use {result}
+```
+
+> Remember the whole reason we're doing this is because if just declared a variable inside the component and modified it, react will not display the changes 
+
+## Let's talk about that function in that array
+- So using `onClick` etc. will not make react display the change, but the function given by `useState` will, when we Destructue the array we follow this naming convention 
+```jsx
+let [variable, setVariable] = React.useState("VOIDPACKET")
+// now to call the function we do :
+setVariable("inside Voidpacket ecosystem")
+```
+- We don't call that function directly in our code it will give us an error : `react can't run mutliple renders`, because it will trigger an infinite loop of calling that component, so we tend to call it in an Event function
+
+```jsx
+import React from "react"
+
+export default function App() {
+    let [isImportant, setIsImportant] = React.useState("Yes")
+    function handleClick() {
+        setIsImportant("Definitely")
+    }
+
+    return (
+        <main>
+            <h1 className="title">Is state important to know?</h1>
+            <button onClick={handleClick} className="value">{isImportant}</button>
+        </main>
+    )
+}
+```
+- So the function can either take a value like `"Definitely"` (what we used in the example above) or a callback function which gets passed to it the value of state
+```jsx
+function handleClick() {
+	setIsImportant( (prevIsImportant) => {
+		
+	})
+}
+```
+
+> Note: if you ever need the old value of state
+to help you determine the new value of state, you should pass a callback function to your state setter function instead of using state directly. This callback function will receive the old value of state as its parameter, which you can then use to determine your new value of state.
+
+## Complex state
+- Sometimes the data will be Array or Objects, let's see how to deal with them
+- When working with those arrays we can't do `array.push()` because this modifies the original array : A BIG NO NO IN REACT
+	- So what we do is we create a new array and we use the spread Operator 
+```jsx
+const [myFavoriteThings, setMyFavoriteThings] = React.useState([])
+
+function addFavoriteThing() {
+    setMyFavoriteThings(prevFavThings => [...prevFavThings, <New Item>])
+  }
+```
+
+> When working with Objects you would do the same thing as arrays : spread operator etc.
+
+## Forms in React
+- Starting from React 19, Forms became so much more fun to work with, they became similar to how you would work with them in HTML
+- SYNTAX :
+```jsx
+<form>
+	<label htmlFor="hello-form">something</label>
+	<input id="hello-form" type="" name="" placeholder="example"/>
+	<button>Submit</button>
+</form>
+```
+
+> The name attribute is how you would get access to the data inserted in the form
+> Buttons inside a form act as `<input type="submit" />` 
+
+- We can add an attribute called `method="POST"` to the `<form>` and now the data submitted using that form will be inserted in the body of the `POST request`
+
+- With forms it's better to listen for changes on the form than the button of the form, so if you have a listening function add it to the attribute `onSubmit={function}` to the `<form>` 
+```jsx
+function handleSubmit(e) {
+	e.preventDefault()
+}
+
+<form onSubmit={handleSubmit} method="POST">
+```
+
+- The `e` argument (known as the `event`) is powerful, it can gives us access to the whole `<form>` we are in, and we can get that data inserted 
+```jsx
+function handleSubmit(e) {
+	e.preventDefault()
+	
+	const formEl = e.currentTarget // taking control of the form we are in
+	const formData = new FormData(formEl)
+	
+	// getting the data from an input
+	const dataWeWant = formData.get("name-of-input-we-want") 
+	
+	formEl.reset() // clear the inputs of the form 
+}
+```
+
+- Another way :
+```jsx
+// The form attributes will be like this 
+<form action={handleSubmit}></form> // fill in your form as you like
+
+/////// JSX ///////
+
+function handleSubmit(formData) {
+	const email = formData.get("name-of-input-we-want")
+}
+```
+- This way we don't have to `e.preventDefault()`, create the new instance of `FormData` or `formEl.reset()` it does all of that automatically thanks to the attribute `action={function}` 
+
+- There are other types of inputs, but let's talk about `type="radio"`, it's like a checklist, you can use it to make the user either choose multiple or just one : most of the time you want them to choose one option
+```jsx
+<label>
+	<input type="radio" name="employmentStatus" />
+	Label text
+</label>
+
+<label>
+	<input type="radio" name="employmentStatus" />
+	another label text
+</label>
+
+<label>
+	<input type="radio" name="employmentStatus" />
+	3rd label text
+</label>
+```
+- Now here since they all have the same `name` attribute : the user can only choose one
+- Best practice is to wrap them inside a `<fieldset>` and add a label for this field inside that `<fieldset>`
+```jsx
+<fieldset>
+	<legend>bla bla bla</legend>
+	<label>
+		<input type="radio" name="employmentStatus" value="data to get back if this option is checked"/>
+		Label text
+	</label>
+	
+	<label>
+		<input type="radio" name="employmentStatus" value="data to get back if this option is checked"/>
+		another label text
+	</label>
+	
+	<label>
+		<input type="radio" name="employmentStatus" value="data to get back if this option is checked"/>
+		3rd label text
+	</label>
+</fieldset>
+```
+
+- You also have the option to select one of them as default by adding this attribute `defaultChecked={true}` 
+
+- Remember i said we can make the user either choose one or multiple, well if you want the user to choose multiple you would use `type="checkbox"` : works the same as `radio` expect since we want get every option the user checked we have to do one change with the `formData` which is using `.getAll` : 
+```jsx
+const checkbox = formData.getAll("checkbox-name")
+```
+
+- We also have drop downs, you achieve them by using `<select>` and `<option>` tags, and in react this is how to implement them
+```jsx
+<label htmlFor="favColor">What is your favorite color?</label>
+<select id="favColor" name="favColor">
+	<option value="red">Red</option>
+	<option value="orange">Orange</option>
+	<option value="yellow">Yellow</option>
+	<option value="green">Green</option>
+	<option value="blue">Blue</option>
+	<option value="indigo">Indigo</option>
+	<option value="violet">Violet</option>
+</select>
+```
+
+## Get all of the data from the form 
+- Sometimes you might have a form with idk 30, 40 inputs, so it would be annoying to grab each one them with `fromData.get`, so instead we use : `Object.fromEntries(formData)` and we get an object with our data
+
+> Unfortunately with checkboxes we still have to do it manually, because we use `.getAll` which returns an array, then you can combine both : the data from the checkbox and the object
+
+```jsx
+ function signUp(formData) {
+// The Object
+    const data = Object.fromEntries(formData) 
+    
+// The checkbox data 
+    const dietaryRestrictions = formData.getAll("dietaryRestrictions")
+    
+// Combination of them
+    const allData = {
+      ...data,
+      dietaryRestrictions
+   }
+}
+```
+> Just make sure the variable name used for checkbox is the same as the name you gave to them as an attribute
