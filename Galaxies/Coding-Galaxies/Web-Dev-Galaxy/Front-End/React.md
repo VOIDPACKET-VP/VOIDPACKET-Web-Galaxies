@@ -510,3 +510,36 @@ const checkbox = formData.getAll("checkbox-name")
 }
 ```
 > Just make sure the variable name used for checkbox is the same as the name you gave to them as an attribute
+
+# Conditional Rendering
+- There is this concept that is not new to you called `Conditional Rendering` : where we basically render something if a condition is true
+- For EXAMPLE we add a `<p>` only if a Boolean is true `isShown`
+```jsx
+{isShown && <p>{props.punchline}</p>} // read more about this in advanced JS
+// It's short circuiting 
+```
+- But make no mistakes, the `&&` have it's shortcomings, one in particular is when we want to show something if condition is true and show something else if condition is false
+	- The example above only show the `<p>` when `isShown` is true
+
+- So another way to do conditional rendering is with `Ternary` 
+```jsx
+<button onClick={toggleShown}>{isShown ? "Hide" : "Show"} punchline</button>
+```
+
+> In the react community, it is best to not use `&&` and use the `Ternary`, That's because if your condition with the `&&` doesn't value to a Boolean bugs will appear
+
+
+# Child and Parent components
+- If you have a state that's in a sibling component, and another sibling needs that state you will have to move the State up a level (parent component of those siblings)
+![[Screenshot 2026-05-22 195918.png]]
+
+> You can't pass states from sibling to sibling directly 
+
+
+# Dynamic styling
+- In react (also in HTML) we have the possibility to pass CSS styles as attributes
+- SYNTAX : `style={{}}` 
+```jsx
+<button style={{backgroundColor: black}} key={pad.id}></button>
+```
+> Note you have to pass it as an object
