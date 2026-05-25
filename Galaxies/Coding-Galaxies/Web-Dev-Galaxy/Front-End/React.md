@@ -543,3 +543,103 @@ const checkbox = formData.getAll("checkbox-name")
 <button style={{backgroundColor: black}} key={pad.id}></button>
 ```
 > Note you have to pass it as an object
+
+
+# Side Effects
+- Since react can't handle everything, especially (out)side effects, like : `localstorage`, `API calls`, `websockets` etc.
+	- So we a function called : `useEffect`
+
+## useEffect
+- It's a React Hook that lets you [synchronize a component with an external system.](https://react.dev/learn/synchronizing-with-effects)
+- SYNTAX : `useEffect(function, dependencies)`
+```jsx
+import { useState ,useEffect } from 'react'
+
+function Component() {
+	const [state, setState] = useState("something")
+	
+	useEffect(() => {
+		// code that's outside the system
+	}) 
+}
+```
+
+> NOTE : dependencies is an array that can be states, props, and it's optional, by adding them the useEffect function will not play on each render, But each time one of those values change, the function will run
+> You can use an `[]` empty array, this way it will run once and that's it
+
+> The code inside the useEffect is run last
+
+
+> PRO TIP : Every time you're using the useEffect ask yourself what values my useEffect rely on, so that i can add them to the dependencies array, this way when they change, React will re-render 
+
+> NOTE : with useEffect, you can't make the callback function async/await
+
+- The `useEffect` can return a `function` , this returned function's purpose is clean up : gets rid of all side effects from the useEffect
+	- It basically works like this : if this component ever gets removed from the view, do the clean up
+```jsx
+
+// In this example we are listening for every window width change
+
+import React from "react"
+
+export default function WindowTracker() {
+    const [windowWidth, setWindowWidth] = React.useState(window.innerWidth)
+
+    React.useEffect(() => {
+        function watchWindowWidth () {
+            console.log("Resized")
+            setWindowWidth(window.innerWidth)
+        }
+        window.addEventListener("resize", watchWindowWidth)
+        return function() {
+            window.removeEventListener("resize", watchWindowWidth)
+        }
+    }, [])
+
+    return (
+        <h1>Window width: {windowWidth}</h1>
+    )
+}
+```
+
+
+# useRef()
+- They are similar to states, but :
+	- You can mutate them directly, unlike states and props which are `immutable` 
+	- Changing them doesn't cause a re-render
+- They allow us to access DOM nodes without needing to assign IDs to elements
+- Logging it will give you an `Object` with a `current` property
+```js
+{current: <initial value>}
+```
+
+- So how it works, let's say we want to scroll down for the viewer to a form section
+	1. `const formSection = React.useRef(<initial value>)`
+	2. We add the `ref={formSection}` attribute to the desired `JSX` element
+```jsx
+<form ref={formSection} action={addIngredient} className="add-ingredient-form">
+```
+3. Now you can access `DOM nodes` like this : 
+```js
+formSection.current.<DOM node>()
+
+// EXAMPLE :
+formSection.current.scrollIntoView()
+
+```
+
+> They can be passed through props etc.
+> You would usually initialize them to `null` 
+
+
+
+# NOTE :
+- When you create a state and you're initial value is a function it's better to do it like this:
+```jsx
+const [dice, setDice] = useState(() => generateAllNewDice())
+
+// Instead of like this :
+
+const [dice, setDice] = useState(generateAllNewDice())
+```
+- That's because it will rerun that function with every render, but we don't want that, we want that function to run in the beginning and stop
