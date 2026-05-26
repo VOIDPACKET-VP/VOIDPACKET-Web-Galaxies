@@ -643,3 +643,7 @@ const [dice, setDice] = useState(() => generateAllNewDice())
 const [dice, setDice] = useState(generateAllNewDice())
 ```
 - That's because it will rerun that function with every render, but we don't want that, we want that function to run in the beginning and stop
+
+## CLSX
+- It's a library that helps with conditionally adding `className` to a `JSX` element
+- Learn More [here](https://www.npmjs.com/package/clsx)
