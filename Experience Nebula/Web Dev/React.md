@@ -13,3 +13,6 @@ const [error, setError] = useState(null)
 ```
 - Make sure you know exactly the data format that stupid API will give you (e.g. the names, array ?, only objects ? )
 - People have some stupid API rules sometimes hhhhhhhh
+
+# Styling
+- When you want to style something based on a condition it's best to have a function that servs your styling for each condition 
