@@ -185,3 +185,199 @@ app.use((req, res) => { // if incorrect
 	- `app.use(cors())` MAKE sure you put it before your other `app.use` 
 
 > JUST like that you can now build a RESTApi
+
+# Middleware
+- It comes after the client sends the request and before the server sends the response
+- Middleware are functions that can modify the response or request objects or end the response early if necessary, like :
+	- Enabling CORS
+	- Parsing requests
+	- Logging requests/errors
+	- ...
+- There are 3 types :
+	- Custom : Built by us
+	- Built-in : Provided by Express
+	- 3rd Party : Outside packages
+
+> Everything we do in Express is based on the Middleware pattern so do read about it [here](https://expressjs.com/en/guide/using-middleware/) 
+
+- To add Middleware, we mostly use `app.use`, here it takes 3 params :
+	- `req` , `res` and `next` which is the function that will be called once the middleware function we're creating has completed
+```js
+app.use((req, res, next) => {
+	console.log('something')
+	next() // This will call the next function
+})
+
+// This one
+app.use((req, res, next) => {
+	console.log('something else')
+	next() // And so on
+})
+```
+- The example above shows `Custom` middleware, where we manually call `next()`, the other cases it will be called under the hood
+
+# Serving Static pages
+- We can achieve that using :
+	- `app.use(express.static("<front-end-folder>"))`
+
+# Creating a DB table using SQLite
+- Install these :
+	- `npm install sqlite3` : will be The DB driver > SQL commands, opens connection to the DB file
+	- `npm install sqlite` : Will be a wrapper > Provides async/await support (basically making SQLite3 more modern)
+- Create a file `createTable.js` 
+	- Import the following :
+```js
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import path from 'node:path'
+```
+
+- Working with DBs is an ASYNC process, so first let's make a function that creates our Table: create an instance of our DB, and execute SQL in our DB
+```js
+async function createTable() {
+	const db = await open({ // open a connection, create an instance
+		filename: path.join('database.db'), // will create our .db file
+		driver: sqlite3.Database
+	})
+	
+	// Executing SQL code
+	await db.exec(` 
+		CREATE TABLE IF NOT EXISTS voidpacket (
+			<You would put columns you want to include>
+			
+			id INTEGER PRIMARY KEY,
+			title TEXT NOT NULL,
+			artist TEXT NOT NULL,
+			price REAL NOT NULL
+		)
+	`)
+	
+	await db.close() // close the connection
+}
+
+createTable() // calling it
+```
+- Now you can run this file in your terminal using :
+	- `node createTable.js`
+- Then to log your DB table you can use this helper function, put it in a different file `logTable.js`, `node logTable.js` 
+```js
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import path from 'node:path'
+
+export async function viewAllProducts() {
+  const db = await open({
+    filename: path.join('database.db'),
+    driver: sqlite3.Database
+  })
+  
+  try {
+    const abductions = await db.all('SELECT * FROM voidpacket')
+    console.table(abductions) // This logs it in a table format
+  } catch (err) {
+    console.error('Error fetching products:', err.message)
+  } finally {
+    await db.close()
+  }
+}
+
+viewAllProducts()
+```
+
+> Sometimes if not all the time you will need to change this code above a bit so that the logged table is logged beautifully 
+
+## USEFUL SQLite3 methods
+### db.exec()
+- Used when you want to run multiple statements at once, like Schema setup
+- DOEASN'T RETURN A THING
+### db.run()
+- Used to run a single statement, like updating, inserting and deleting 
+- DOEASN'T RETURN A THING
+### db.get()
+- Used when you want One Row back (or the first Row), like when you look up a row by id
+### db.all()
+- Used when you want all matching rows from a table as an array, like selecting all in stock products
+
+## Seeding a Table 
+- Inserting into the Table, a lot of times we have to deal with variables right, and in JS we use `${}`, but in SQLite it's like C/C++ but we use `?` followed by an array of those variables
+```js
+await db.run(`INSERT INTO abductions (location, details) VALUES (?, ?)`, [location, details])
+```
+
+> NOTE : USING placeholders `?` prevent against SQL injection attacks 
+
+- And the full code will look like this :
+```js
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import path from 'node:path'
+import { abductionsData } from './abductionsData.js'
+  
+async function seedTable() {
+  const db = await open({
+    filename: path.join('database.db'),
+    driver: sqlite3.Database
+  })
+
+  try {
+    await db.exec('BEGIN TRANSACTION') // To make it faster
+
+    for (const {location, details} of abductionsData) {
+      await db.run(
+        `INSERT INTO abductions (location, details)
+        VALUES (?, ?)`,
+        [location, details]
+      )
+    }
+    
+    await db.exec('COMMIT') // and this too
+    console.log('All records inserted')
+    
+  } catch (err) {
+    await db.exec('ROLLBACK') // For error handling
+    console.log('Error inserting data', err.message)
+    
+  } finally {
+    await db.close()
+    console.log('connection closed')
+  }
+}
+  
+seedTable()
+```
+
+## Get data
+- You can use `await db.all()`
+```js
+const abductions = await db.all(`SELECT * FROM abductions`)
+```
+- This code is vulnerable, it will be executed in the front-end so a user can manipulate it etc., it's better to use placeholders : 
+```js
+const query = 'SELECT * FROM abductions WHERE location = ?'
+const params = ['Roswell'] // this is the user's input 
+
+const abductions = await db.all(query, params)
+```
+
+
+> NOTE : in the real world instead of every time having to create a connection with our DB, we just make a file that does that for us and we use when we want: create a folder `db` inside it a file called `db.js` and use this code bellow:
+
+```js
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import path from 'node:path'
+
+export async function getDBConnection() {
+
+const dbPath = path.join('database.db')
+
+ return open({
+   filename: dbPath,
+   driver: sqlite3.Database
+ })
+
+}
+```
+
+>  As for those `createTable.js` `seedTable.js` these are single use and that's it, we can delete them 
+
