@@ -381,3 +381,107 @@ const dbPath = path.join('database.db')
 
 >  As for those `createTable.js` `seedTable.js` these are single use and that's it, we can delete them 
 
+
+# Authentication
+- So this is the most fun topic for me, so am writing this just to remind myself on how excited i was when i started learning it
+
+- Now let's start for real 
+## Creating the users table
+- Obviously you need a table to register your users info, you can do this in your `createTable.js` 
+```js
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import path from 'node:path'
+
+async function createTable() {
+
+      const db = await open({
+            filename: path.join('database.db'),
+            driver: sqlite3.database
+      })
+
+      await db.insert(`
+            CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT UNIQUE NOT NULL,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+      `)
+  
+      await db.close()
+      console.log('table created')
+}
+
+createTable()
+```
+
+## Get users signed up and logged in
+- There are 5 steps :
+	1. Create a route for the `api/auth/register` endpoint
+	2. Validate and sanitize user input 
+	3. Add new user to the `users` table
+	4. Think about password security in the DB
+	5. Create a session for the user
+
+### Creating the route 
+- So you'll need a front end file that handles taking the data from the signing form and passing them to our server as a `POST REQUEST` where you'll pass those data in the body, the code can be like this :
+
+```js
+const signupForm = document.getElementById('signup-form')
+const errorMessage = document.getElementById('error-message')
+
+signupForm.addEventListener('submit', async (e) => {
+  e.preventDefault() // Prevent form from reloading
+
+  const name = document.getElementById('signup-name').value.trim()
+  const email = document.getElementById('signup-email').value.trim()
+  const username = document.getElementById('signup-username').value.trim()
+  const password = document.getElementById('signup-password').value.trim()
+  const submitBtn = signupForm.querySelector('button')
+
+  errorMessage.textContent = '' // Clear old errors
+  submitBtn.disabled = true
+
+  try {
+    const res = await fetch('api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email, username, password })
+    })
+
+    const data = await res.json()
+
+    if (res.ok) {
+      window.location.href = '/'
+    } else {
+      errorMessage.textContent = data.error || 'Registration failed. Please try again.'
+    }
+  } catch (err) {
+    console.error('Network error:', err)
+    errorMessage.textContent = 'Unable to connect. Please try again.'
+  } finally {
+    submitBtn.disabled = false
+  }
+})
+```
+
+
+- Then you need to create a route in the routes folder and it's controller in the controllers folder like you would do, then we need to make some changes in the `server.js` file
+	- Since Express.js doesn't parse incoming request bodies by default, you need to add body-parsing middleware _above_ your router declarations
+	- We need the `req.body` cause well it contains the data
+
+```js
+// 1. Add this to parse JSON bodies (for applications/json) 
+app.use(express.json()); 
+
+// 2. Add this to parse form data (for application/x-www-form-urlencoded) 
+app.use(express.urlencoded({ extended: true }));
+```
+
+and then you would need to add the `app.use` for that specific route
+- `app.use('/api/auth', authRouter)`
