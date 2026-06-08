@@ -485,3 +485,33 @@ app.use(express.urlencoded({ extended: true }));
 
 and then you would need to add the `app.use` for that specific route
 - `app.use('/api/auth', authRouter)`
+
+### Validating and sanitizing user input
+- So we can't do frontend validation cause it can be overridden by hackers, so we have to take care of that in the backend
+
+- So here is what we need to do :
+	1. Check if all fields exist
+	2. Trim the whitespace from start and end
+	3. Use regex in the username (not the name/fullname)
+	4. Validating the email address (check if it's a valid email)
+		- Using an npm package called : [The validator](https://www.npmjs.com/package/validator) using it's `isEmail(<email>)` method 
+
+### Adding users to DB
+
+> Pro tip : now we first need to check if the username and email are already used (avoiding duplicates) , and the best way to do that is : to query the DB : saying hey look for a user with this username OR this email and if the DB finds it, we now know that that username or email already exists and we can end the response and send a message to the frontend saying the registration has failed because this is a duplicate etc.
+
+- It will look something like this :
+```js
+try {
+
+    const db = await getDBConnection()
+    const existing = await db.get('SELECT id FROM users WHERE email = ? OR username = ?', [email, username])
+
+    if (existing) {
+      return res.status(400).json({ error: 'Email or username already in use.' })
+    }
+    const result = await db.run('INSERT INTO users (name, email, username, password) VALUES (?, ?, ?, ?)', [name, email, username, password])
+
+    res.status(201).json({ message: 'User registered'})
+```
+
