@@ -108,3 +108,40 @@ ret
 ```
 - The first three are called the ==function prologue== and they set up the stack frame for the function.
 - The last two instructions restore the previous function’s stack frame and return to the function that called this current function.
+
+## Breakpoints
+- The best way to start reversing a game is to figure out what you want to look at and then find where it is. There are many ways to establish that context, but no matter which one you choose you will always use a ==breakpoint==
+- They allow the debugger to pause execution of the game at a specific instruction.
+
+>  You can set breakpoints on any type of memory. This includes memory found using a memory scanner.
+
+> Breakpoints can be set to trigger both non-conditionally and conditionally. When a breakpoint is triggered, it’s also known as popping.
+### Memory Breakpoints
+- Key insight: breakpoints pause AFTER the instruction that touches the memory, not ON it.
+- So here is a ==workflow== based on the gold example we did in that game `Wasnoth` :
+	1. Find the memory address of gold (Cheat Engine) 
+	2. Set memory breakpoint ON that address 
+	3. Trigger the event (recruit a unit) 
+	4. Breakpoint pops → we're now inside the function that handles gold subtraction 
+	5. We can see exactly how gold is calculated and modified
+### Code breakpoints
+- Used when no obvious variable to scan for, so what we do is set a breakpoint on a text reference :
+	1. Find a text string in the game (error message, log) 
+	2. Set breakpoint on where that string is referenced 
+	3. Trigger the condition in game 
+	4. Step OUT of the function until you reach what called it 
+	5. Now you're in the function you actually want to modify
+### The `nop` instruction
+- It's opcode is `0x90`, stands for no operation. When encountering this instruction, a CPU will do nothing and continue on to the next instruction
+
+> So the trick is instead of changing the value, we remove the instruction 
+
+
+- The RE workflow for game hacking:
+	1. Identify what you want to change
+	2. Find the memory value (Cheat Engine scanner)
+	3. Set a breakpoint to find the CODE that touches it
+	4. Read/understand the assembly around the breakpoint
+	5. Modify: change a value, NOP an instruction, 
+   or inject your own code (code cave)
+> Breakpoints are the bridge between "I found the value" and "I found the code"
