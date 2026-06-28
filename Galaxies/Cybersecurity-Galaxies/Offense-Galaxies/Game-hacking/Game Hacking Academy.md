@@ -145,3 +145,161 @@ ret
 	5. Modify: change a value, NOP an instruction, 
    or inject your own code (code cave)
 > Breakpoints are the bridge between "I found the value" and "I found the code"
+
+## Changing Game Code 
+- EXAMPLE :
+```
+Changing Game Code — Workflow
+
+Goal: Make gold not decrease when recruiting units
+
+Steps:
+1. Find gold address in Cheat Engine (memory scanner)
+2. Close Cheat Engine, open x64dbg
+3. Attach x64dbg to the running game process
+   File → Attach → select Wesnoth
+4. Navigate to gold address in the Dump section
+   Right-click → Go to → Expression → paste address
+5. Set hardware breakpoint on that address
+   Right-click on value → Breakpoint → Hardware, Write → DWORD
+   (triggers when anything WRITES to that memory)
+6. Resume game execution (press Play until unpaused)
+7. Trigger the event in game (recruit a unit)
+8. Breakpoint pops → execution pauses
+9. Scroll UP in code window to find the sub instruction
+   (breakpoint lands AFTER the write, so scroll up)
+10. NOP out the sub instruction
+    Right-click → Binary → Fill with NOPs
+11. Remove the breakpoint (Breakpoints tab → Remove)
+12. Resume game → gold no longer decreases ✅
+
+Key concepts:
+- EIP = Extended Instruction Pointer
+  tells the CPU where it currently is in execution
+  when breakpoint pops, EIP shows current location
+
+- Hardware Write breakpoint = triggers when
+  memory at that address is WRITTEN to
+  (not read, not executed — specifically written)
+
+- Why 3 NOPs? 
+  The sub instruction was 3 bytes long
+  NOP is 1 byte (0x90)
+  So 3 NOPs replace it to maintain code alignment
+  (covered in future lesson)
+
+- Why scroll UP after breakpoint pops?
+  Breakpoint lands on the instruction AFTER
+  the one that wrote to memory
+  The sub modifies a register first,
+  then mov writes to memory → that's what triggers it
+  So sub is always one instruction above
+```
+
+## Reversing Code
+- This one is hard so pay attention
+- EXAMPLE 
+```
+Reversing Code — Bubbling Up
+
+Goal: recruit units anywhere on the map
+Method: find the context menu handler by bubbling up
+        from known code (gold subtraction)
+
+Key concepts:
+
+Bubbling Up:
+→ Start at known code deep in the call stack
+→ Execute till return → lands on retn instruction  
+→ Step over the retn → arrives at calling function
+→ Repeat until you reach the function you want
+→ Like climbing a ladder from the bottom rung
+
+Call vs Return in assembly:
+   call some_address  → jump INTO a function
+                        (pushes return address to stack)
+   retn               → jump BACK to caller
+                        (pops return address from stack)
+
+Step Into vs Step Over:
+   Step Into  → follow the call, enter the function
+   Step Over  → execute the call but stay at same level
+                skip over function internals
+
+Function Pointer Arrays (the big discovery):
+→ Games don't always use switch statements
+→ Often use arrays of function pointers:
+   functions[] = {terrain_desc, recruit, attack...}
+   functions[option_selected]()  ← called by offset
+→ In assembly this looks like:
+   call dword ptr ds:[eax + 0x54]
+   call dword ptr ds:[eax + 0x28]
+   call dword ptr ds:[eax + 0x68]
+   (each offset = different menu action)
+
+The hack:
+→ Found recruit = offset 0x54
+→ Found terrain description = offset 0x28  
+→ Found debug spawn menu = offset 0x68
+→ Changed terrain description call to use 0x68
+→ Now selecting terrain description opens debug menu
+→ Debug menu available everywhere → recruit anywhere ✅
+
+Verification method:
+→ NOP the call → test in game → nothing happens
+→ Confirms you found the right location
+→ Restore selection → undo the NOP
+→ Then make your real change
+```
+
+## Code Caves
+- So far the hacks we did only included changing 1 instruction, but what if we want to replace multiple instructions. That's where a ==Code Cave=== comes in.
+- It's a section of the game’s memory that we fill with instructions. Most games will have large sections of unused memory between functions or at the end of the executable. These locations are perfect for creating a code cave in.
+- So what you need to know is the following :
+```
+Code Caves
+
+Problem: what if you want to ADD instructions 
+         instead of replacing them?
+         (keep original + add new behavior)
+
+Solution: Code Cave
+→ Find empty/unused memory in the game
+→ Write your new instructions there
+→ Redirect original code to your cave
+→ Jump back when done
+
+Skeleton (always follow this):
+┌─────────────────────────────┐
+│ pushad                      │  ← save ALL registers
+│ [your new code here]        │  ← new functionality  
+│ popad                       │  ← restore ALL registers
+│ [original instruction]      │  ← keep original behavior
+│ jmp back to game code       │  ← return to normal flow
+└─────────────────────────────┘
+
+Why pushad/popad?
+→ Your new code might change register values
+→ Game's next function might DEPEND on those values
+→ Without save/restore → game crashes
+→ pushad saves eax,ebx,ecx,edx... to stack
+→ popad restores them all
+
+The Wesnoth example:
+Original:  0x00CCAF90  call [eax+0x28]  ← terrain description
+           ↓ replaced with:
+Modified:  0x00CCAF90  jmp 0x00D00000   ← jump to cave
+
+Cave at 0x00D00000:
+    pushad
+    call [eax+0x68]      ← debug menu (new behavior)
+    popad
+    call [eax+0x28]      ← terrain description (original)
+    jmp 0x00CCAF93       ← back to game, instruction after original
+
+Result: selecting terrain description now
+        opens debug menu AND shows terrain description ✅
+```
+
+> Key rule: only modify what you need, never leave registers in a different state than you found them
+
