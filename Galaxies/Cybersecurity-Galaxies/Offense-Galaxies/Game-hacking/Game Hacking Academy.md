@@ -303,3 +303,263 @@ Result: selecting terrain description now
 
 > Key rule: only modify what you need, never leave registers in a different state than you found them
 
+### Code cave example :
+
+```
+Code Caves — Real Example (Wesnoth Gold Hack)
+
+Goal: set gold to 999 when Terrain Description is selected
+
+════════════════════════════════════════════════
+
+WHAT I NEED BEFORE STARTING
+────────────────────────────
+Two addresses:
+  1. Hook location  → where I redirect the game's code
+                      (the instruction I'll replace with a jmp)
+  2. Cave location  → where I write my new code
+                      (empty memory, usually end of executable)
+
+════════════════════════════════════════════════
+
+STEP 1 — FIND THE CAVE LOCATION
+────────────────────────────────
+Scroll to the end of the executable module in x64dbg.
+At the end of most executables there's a large section
+of 0x00 bytes — unused, empty, safe to overwrite.
+This is where I put my cave.
+
+════════════════════════════════════════════════
+
+STEP 2 — FIND THE HOOK LOCATION
+────────────────────────────────
+Find the instruction I want to redirect.
+This is the instruction I'll replace with a jmp.
+
+Important: jmp is 5 bytes long.
+So I need AT LEAST 5 bytes at the hook location.
+
+If the instruction there is smaller than 5 bytes,
+I take the next instruction too until I have >= 5 bytes.
+Whatever bytes are left over → fill with NOP (x64dbg does this automatically).
+
+In this example:
+  8B01        mov eax, dword ptr ds:[ecx]     → 2 bytes
+  8D7426 00   lea esi, dword ptr ds:[esi]     → 4 bytes
+  Total = 6 bytes → enough for a 5 byte jmp + 1 NOP
+
+Both instructions get replaced by:
+  jmp 0x0134360E   (5 bytes)
+  nop              (1 byte — automatic)
+
+And since I replaced two instructions,
+I MUST recreate both in my cave.
+
+════════════════════════════════════════════════
+
+STEP 3 — PLAN THE CAVE ON PAPER FIRST
+───────────────────────────────────────
+CRITICAL RULE: you cannot INSERT instructions in memory.
+You can only OVERWRITE.
+Think of it like painting over a canvas, not like a text editor.
+
+So before touching x64dbg, I write out the complete
+final cave on paper or in a text file:
+
+  pushad
+  [new hack code]
+  popad
+  [original instructions I replaced at hook location]
+  jmp back to game code (hook location + number of bytes replaced)
+
+In this example, the complete cave:
+  pushad
+  mov dword ptr ds:[0x5F3B85C], 0x3E7   ← set gold to 999 (0x3E7)
+  popad
+  mov eax, dword ptr ds:[ecx]            ← original instruction 1
+  lea esi, dword ptr ds:[esi]            ← original instruction 2
+  jmp 0xCCAF90                           ← back to game (hook + 6 bytes)
+
+════════════════════════════════════════════════
+
+STEP 4 — PAUSE THE GAME
+────────────────────────
+Before writing ANYTHING, pause the game in x64dbg.
+If the game is running and accidentally enters my
+half-written cave → it jumps to incomplete code → crash.
+Always pause first, write everything, then resume.
+
+════════════════════════════════════════════════
+
+STEP 5 — WRITE THE CAVE
+────────────────────────
+Navigate to cave location (0x0134360E).
+Write instructions top to bottom, one by one.
+Do NOT try to go back and insert between instructions.
+Write the complete final version in one pass.
+
+════════════════════════════════════════════════
+
+STEP 6 — WRITE THE JMP AT HOOK LOCATION
+─────────────────────────────────────────
+Navigate to hook location (0x00CCAF8A).
+Replace the first instruction with:
+  jmp 0x0134360E
+Make sure "Fill with NOPs" is checked in x64dbg.
+This handles the leftover byte automatically.
+
+════════════════════════════════════════════════
+
+STEP 7 — VERIFY BEFORE TESTING
+────────────────────────────────
+Set a breakpoint somewhere inside the cave.
+Resume the game.
+Trigger the event (select Terrain Description).
+If the breakpoint pops → redirection is working ✅
+Remove the breakpoint.
+Test in game → gold should be 999.
+
+════════════════════════════════════════════════
+
+SKELETON APPROACH vs DIRECT APPROACH
+──────────────────────────────────────
+Skeleton approach:
+  → write minimal cave first (just pushad/popad + originals + jmp back)
+  → verify redirection works with a breakpoint
+  → THEN overwrite with the complete final cave
+  → useful for complex caves where you want to verify step by step
+
+Direct approach:
+  → plan complete cave on paper first
+  → write the full final cave in one pass
+  → simpler and faster for straightforward hacks
+
+Both are valid. Choose based on complexity.
+
+════════════════════════════════════════════════
+
+THE RULE THAT PREVENTS CRASHES
+────────────────────────────────
+Always use pushad/popad around new code:
+  pushad  → saves ALL register values to the stack
+  [code]  → my new instructions (can freely use registers here)
+  popad   → restores ALL register values from the stack
+
+Why? The game's next function might depend on
+register values being exactly what they were.
+If I accidentally change eax and the game expects
+eax to be a specific value → exception → crash.
+pushad/popad = insurance against this.
+```
+
+## Dynamic memory allocation
+- Theory :
+```
+Dynamic Memory Allocation (DMA)
+
+════════════════════════════════════════════════
+
+WHY DOES THE ADDRESS CHANGE EVERY RESTART?
+────────────────────────────────────────────
+Games are too large to fit everything in RAM at once.
+So they load resources WHEN NEEDED and unload them when done.
+This process = Dynamic Memory Allocation (DMA).
+
+When Wesnoth starts → Player class gets allocated somewhere in RAM
+The OS decides WHERE → the game has no control over this
+Every restart → OS picks a different location
+Result → gold address is different every time
+
+This is why Cheat Engine finds a different address each session.
+
+════════════════════════════════════════════════
+
+THE SOLUTION: BASE POINTER
+───────────────────────────
+Some addresses MUST be constant — the game needs to 
+find its own data somehow.
+
+Example: Wesnoth always knows where the Player class starts.
+If I find the Player class address → it's always the same.
+From there I use OFFSETS to reach gold:
+
+  Player class address (constant) + offset → gold address
+
+This constant address = BASE POINTER
+Base pointer + offsets = always leads me to gold
+no matter how many times the game restarts.
+
+This is EXACTLY the pointer chain concept in Cheat Engine.
+
+════════════════════════════════════════════════
+
+3 METHODS TO DEFEAT DMA
+────────────────────────
+
+METHOD 1 — Cheat Engine Pointer Scan (easiest)
+  → Find gold address in current session
+  → Right-click → Pointer Scan
+  → Cheat Engine finds all addresses that POINT to gold
+  → Restart game, find gold again
+  → Compare old scan with new scan
+  → Keep only addresses that pointed to gold BOTH times
+  → Repeat until left with consistent base pointer + offsets
+  → Save this → now works every session ✅
+
+METHOD 2 — Code Cave
+  → Find instruction that accesses gold (the sub instruction)
+  → Redirect to a code cave immediately after it
+  → In the cave, save the gold ADDRESS to a location I control:
+    
+    pushad
+    mov dword ptr ds:[0x12345678], edx+4  ← save gold address
+    popad
+    [original instruction]
+    jmp back
+
+  → Now 0x12345678 always holds the current gold address
+  → My hack reads from 0x12345678 → always finds gold ✅
+
+METHOD 3 — Reversing (most powerful, most complex)
+  → Find the instruction that touches gold (sub instruction)
+  → edx+4 holds the gold address — where does edx come from?
+  → Scroll up, find where edx was assigned → maybe from eax+60
+  → Where does eax come from? → scroll up again
+  → Keep going up the chain until reaching a CONSTANT address
+  → That constant = base pointer
+  → All the offsets collected along the way = the chain
+  → Combine them: base + offset1 + offset2 + ... = gold ✅
+  → This is the most reliable method long term
+
+════════════════════════════════════════════════
+
+COMPARISON
+───────────────
+  Cheat Engine scan  → easy, guided, good for beginners
+  Code cave          → medium, saves address dynamically
+  Reversing          → hard, most versatile, works forever
+
+In real game hacking:
+  → start with Cheat Engine to find the address
+  → use reversing to find the base pointer
+  → code cave as a middle ground when reversing is too complex
+
+════════════════════════════════════════════════
+
+CONNECTION TO EARLIER CONCEPTS
+────────────────────────────────
+Remember the LEA lesson?
+  lea eax, [ecx]  → load the ADDRESS into eax
+
+That's exactly what's happening here.
+The game uses pointers and offsets internally
+to navigate its own class structures.
+DMA defeating = reading those same pointers
+the same way the game does.
+
+When you scan for a pointer chain in Cheat Engine
+you're essentially reverse engineering how the game
+navigates its own memory — 
+the same thing it does with LEA and MOV instructions.
+```
+### Defeating DMA
