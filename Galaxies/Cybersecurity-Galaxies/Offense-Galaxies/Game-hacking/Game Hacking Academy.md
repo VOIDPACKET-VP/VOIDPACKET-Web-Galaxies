@@ -563,3 +563,139 @@ navigates its own memory —
 the same thing it does with LEA and MOV instructions.
 ```
 ### Defeating DMA
+- EXAMPLE
+- This one is fun tbh
+```
+Defeating DMA — Reversing Method
+
+Core question at every step:
+"Where did this value come from?"
+Always look ABOVE the current instruction.
+Code runs top to bottom → values are set before they're used.
+
+The methodology:
+1. Breakpoint pops on instruction that touches gold
+   → identify which register holds the gold address
+   → only follow THAT register (ignore all others)
+
+2. Scroll UP → find where that register was assigned
+   → if assigned from another register → follow that one
+   → if assigned inside a called function → step INTO it
+
+3. Keep substituting backwards:
+   gold = [eax + 4]
+   eax  = [ecx + 60] + 0xA90
+   therefore: gold = [[ecx + 60] + 0xA90] + 4
+
+4. At each new register → test if it's constant:
+   → note its current value
+   → note the instruction ADDRESS that sets it
+     (code addresses are constant, data addresses are not)
+   → restart game completely
+   → breakpoint at same instruction address
+   → trigger same event
+   → same value? → BASE POINTER FOUND → STOP
+   → different value? → keep going up the chain
+
+5. Verify with Cheat Engine:
+   Add Address Manually → check Pointer
+   Enter base pointer + all offsets collected
+   Should resolve to current gold value ✅
+   Restart game → pointer updates automatically ✅
+
+Final result for Wesnoth:
+  Base: 0x017EED18 (constant)
+  Offsets: +0xA90, then +4
+  [[0x017EED18] + 0xA90] + 4 = gold address always
+```
+
+# Programming
+There are three main types of game hacks that can be programmed. These are:
+
+- ==External executables== : stand-alone programs that can be executed normally. These executables use functions built into Windows, known as Application Programming Interfaces (API’s), to read and modify memory of another executable.
+
+- ==Injected DLL’s (dynamic-link libraries)== :  need to be loaded into the game’s memory in some way. Once loaded, they execute within the memory of the game and can directly access the game’s memory through pointers
+
+- ==Custom wrappers== : used when creating hacks that target the game’s drawing libraries, such as DirectX and OpenGL. By loading a custom version of these libraries that “wrap” the original functionality, we can cause the game’s drawing logic to be altered.
+
+## External Memory Hack
+
+- So we will be using the Windows API to make our hacks, so we need to include the header for the windows API: 
+	- `#include <Windows.h>`
+
+### Reading values
+- We need to read several values, The API to read another process’s memory is called [ReadProcessMemory](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-readprocessmemory) 
+
+> This documentation describes how the API works, including what parameters it takes and what values it returns.
+
+> We will also use The [Win32 Coding Style Conventions](https://learn.microsoft.com/en-us/windows/win32/stg/coding-style-conventions)documentation, which provides information on how each parameter is formatted and named.
+
+- **ReadProcessMemory**’s function definition is:
+
+```
+BOOL ReadProcessMemory(
+    HANDLE  hProcess,
+    LPCVOID lpBaseAddress,
+    LPVOID  lpBuffer,
+    SIZE_T  nSize,
+    SIZE_T  *lpNumberOfBytesRead
+);
+```
+
+- So :
+```
+WHAT WE HAVE vs WHAT WE NEED
+──────────────────────────────
+  lpBaseAddress  → we have this: 0x017EECB8 (base pointer)
+  nSize          → we know this: 4 bytes (size of a register)
+  hProcess       → DON'T have yet → next lesson
+  lpBuffer       → we create this ourselves (DWORD variable)
+  lpNumberOfBytesRead → we create this ourselves (DWORD variable)
+
+════════════════════════════════════════════════
+
+THE CODE SO FAR
+────────────────
+  #include <Windows.h>
+
+  int main(int argc, char** argv) {
+
+      DWORD gold_value = 0;    ← buffer for the result
+      DWORD bytes_read = 0;    ← buffer for bytes actually read
+
+      ReadProcessMemory(
+          wesnoth_process,     ← TODO: get this next lesson
+          0x017EECB8,          ← our base pointer
+          &gold_value,         ← & because API expects a POINTER
+          4,                   ← read 4 bytes (DWORD = 32 bits)
+          &bytes_read          ← & because API expects a POINTER
+      );
+
+      return 0;
+  }
+
+════════════════════════════════════════════════
+
+KEY CONCEPTS
+─────────────
+DWORD = 32 bits = 4 bytes
+→ matches the size of registers we saw while reversing
+→ correct size to hold our gold value
+
+Why & before gold_value and bytes_read?
+→ ReadProcessMemory doesn't want the value of those variables
+→ it wants to WRITE INTO them
+→ so we pass their ADDRESS using &
+→ API then fills them in for us after execution
+
+════════════════════════════════════════════════
+
+MISSING PIECE
+──────────────
+wesnoth_process (the HANDLE) is still unknown.
+A HANDLE = a reference to an open process in Windows.
+We need to ask Windows for a handle to Wesnoth.
+→ covered in next section
+```
+
+## Opening Processes
