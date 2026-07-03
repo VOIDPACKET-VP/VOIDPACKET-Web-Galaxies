@@ -904,4 +904,64 @@ SIZE_T bytes_written = 0;
 ```cpp
 WriteProcessMemory(wesnoth_process, reinterpret_cast<LPVOID>(gold_value), &new_gold_value, 4, &bytes_written);
 ```
-- That's it you can find the full code in my [Github]()
+- That's it you can find the full code in my [Github](https://github.com/VOIDPACKET-VP/voidPacketProjects/blob/main/CyberProjects/GameHacks/wesnoth_external_memory_hack.cpp) 
+
+## DLL Memory Hack
+- Using ==external programs== has big limits. You have to convert data carefully, and dealing with complex game files or whole character classes is too difficult. External programs also cannot easily listen to game buttons you press, and adding custom code requires manually translating everything into opcodes
+
+- To fix this, you can ==inject a DLL== directly into the game. Once inside, the DLL becomes part of the game itself. This lets it read and change any data instantly using pointers. It can also run its own background tasks to watch for player button presses and handle complex data smoothly.
+
+### Creating DLLs
+- You create the project like you always do, create the `main.cpp`, then right click on the project > properties > General > Then change the _Configuration Type_ from _Application_ to _Dynamic Library_ 
+### DLL Basics
+#### What is a DLL?
+- ==**They can't run on their own==:** A DLL (Dynamic Link Library) cannot be executed by itself. It has to be loaded inside a normal executable program (like a `.exe`).
+- ==**They save time and space==:** Developers put common functions into a DLL so multiple programs can share them. This means developers don't have to rewrite the same code over and over.
+- ==**Easy updates==:** For example, the Windows file `user32.dll` handles pop-up alerts. If Microsoft updates how an alert looks inside that DLL, every single program using it automatically gets the new look without needing to change its own code.
+#### How DLLs Differ from Normal Programs
+1. **Different main function:** Instead of a standard `main` function, they use `DllMain`.
+2. **Triggered by events:** `DllMain` automatically runs whenever a program loads or unloads the DLL.
+3. **Shared memory:** DLLs run _inside_ the memory of the program that loaded them.
+
+- The [DllMain](https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain) function has different parameters from a **main** function. Its definition is:
+
+```cpp
+BOOL WINAPI DllMain(
+    _In_ HINSTANCE hinstDLL,
+    _In_ DWORD     fdwReason,
+    _In_ LPVOID    lpvReserved
+);
+```
+
+The setting called `fdwReason` is used by the function to know _why_ it was called. When a DLL is first loaded into a program, this setting equals `1` (also known as `DLL_PROCESS_ATTACH`). In hacking, you check for this value to make sure your code only runs once.
+
+#### DLL Injection in Hacking
+Because DLLs must run inside another program's memory, hackers have to force a target program to load their malicious DLL. This process is called **DLL injection**.
+
+It can be tricky to know if an injection actually worked. While you could use a debugger to look deep inside the program's loaded modules, that takes a lot of time. A simpler testing method—which is used here—is to code the DLL to display an ==obvious visual indicator== (like a pop-up alert) the moment it successfully injects.
+
+### MessageBox
+- It displays a message box in a process. The [definition](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox) for this function is:
+
+```cpp
+int MessageBox(
+    HWND    hWnd,
+    LPCTSTR lpText,
+    LPCTSTR lpCaption,
+    UINT    uType
+);
+```
+- Due to how C++ handles parameter casting, we can ignore the types for these values :
+	- `MessageBox(0,0,0,0);`
+	- This will display a blank message box with an _Error_ title and no text.
+
+- We can use this behavior to ensure that our DLL is injected successfully into ==Wesnoth==, so inside `main.cpp` add this :
+```cpp
+#include <Windows.h>
+BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
+
+	MessageBox(0,0,0,0);	
+	return true;
+	
+}
+```
