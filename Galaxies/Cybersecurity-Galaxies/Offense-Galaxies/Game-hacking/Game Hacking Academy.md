@@ -630,9 +630,8 @@ There are three main types of game hacks that can be programmed. These are:
 
 > We will also use The [Win32 Coding Style Conventions](https://learn.microsoft.com/en-us/windows/win32/stg/coding-style-conventions)documentation, which provides information on how each parameter is formatted and named.
 
-- **ReadProcessMemory**’s function definition is:
-
-```
+- ==**ReadProcessMemory**’s== function definition is:
+```cpp
 BOOL ReadProcessMemory(
     HANDLE  hProcess,
     LPCVOID lpBaseAddress,
@@ -698,4 +697,211 @@ We need to ask Windows for a handle to Wesnoth.
 → covered in next section
 ```
 
-## Opening Processes
+### Opening Processes
+- So we said we need the `wesnoth_process` handle, we can use an API called [OpenProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess), it's definition is :
+``` cpp
+HANDLE OpenProcess(
+    DWORD dwDesiredAccess,
+    BOOL  bInheritHandle,
+    DWORD dwProcessId
+);
+```
+
+> NOTE : this API returns a ==HANDLE== 
+
+- Looking at the documentation, we want our ==desired access== (first param) to be ==**PROCESS_ALL_ACCESS**==, so that we can both read and write to the process. The ==second parameter== does not matter for what we are doing, so we will set it to the value of ==true==. We will need to find the ==last parameter==, so for now, we will create a variable.
+
+- So now our code looks like this :
+```cpp
+HANDLE wesnoth_process = OpenProcess(PROCESS_ALL_ACCESS, true, process_id);
+
+DWORD gold_value = 0;
+DWORD bytes_read = 0;
+ReadProcessMemory(wesnoth_process, 0x017EECB8, &gold_value, 4, &bytes_read);
+```
+
+- To get the ==Last param== (ProcessId) we will use another API called [GetWindowThreadProcessId](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowthreadprocessid) 
+	- This API retrieves a process ID when provided with a ==window handle==, which is different than a ==process handle==. The definition for this API is:
+```cpp
+DWORD GetWindowThreadProcessId(
+    HWND    hWnd,
+    LPDWORD lpdwProcessId
+);
+```
+
+- And to get a ==Window handle== we use the API called [FindWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-findwindowa) 
+	- This function takes the name of a window title and returns a handle to the window. The definition is:
+```cpp
+HWND FindWindowA(
+    LPCSTR lpClassName,
+    LPCSTR lpWindowName
+);
+```
+- Since we want to search all windows, we will set the first parameter to **NULL**. For the second parameter, we know the name of the Wesnoth window, as it is displayed in the game’s title bar.
+
+- Our final code will be :
+```cpp
+#include <Windows.h>
+#include <tchar.h> // we need it for the _T macro 
+
+int main(int argc, char** argv) {
+
+	HWND wesnoth_window = FindWindow(NULL, _T("The Battle for Wesnoth - 1.14.9"));
+
+	DWORD process_id = 0;
+	GetWindowThreadProcessId(wesnoth_window, &process_id);
+
+	HANDLE wesnoth_process = OpenProcess(PROCESS_ALL_ACCESS, true, process_id);
+
+
+	DWORD gold_value = 0;
+	SIZE_T bytes_read = 0;
+
+	ReadProcessMemory(wesnoth_process, reinterpret_cast<LPCVOID>(0x017EECB8), &gold_value, 4, &bytes_read);
+
+	return 0;
+}
+```
+
+- There are some stuff i changed and it's because of errors :
+```
+THE TWO ERRORS WE HAD TO FIX
+──────────────────────────────
+1. FindWindow string → needed to be LPCWSTR not const char*
+2. ReadProcessMemory address → needed to be LPCVOID not int
+
+════════════════════════════════════════════════
+
+FIX 1 — THE STRING CAST
+
+Course solution:
+  L"The Battle for Wesnoth - 1.14.9"
+  → L prefix hardcodes the string as wide characters (UTF-16)
+  → works, but ONLY in Unicode mode
+  → if you switch to Multi-byte mode → breaks
+
+my solution:
+  #include <tchar.h>
+  _T("The Battle for Wesnoth - 1.14.9")
+  → _T is a macro from tchar.h
+  → automatically adapts to the project's character set:
+    Unicode mode   → _T becomes L"..." (wide string)
+    Multi-byte mode → _T becomes "..."  (normal string)
+  → works in BOTH modes without changing the code
+
+WHY mine IS BETTER:
+  The course solution is a quick fix.
+  _T is the correct Windows programming practice —
+  it's what Microsoft actually recommends for portable code.
+  Your code will compile correctly regardless of 
+  the project's character encoding setting.
+
+════════════════════════════════════════════════
+
+FIX 2 — THE ADDRESS CAST
+
+Course solution:
+  (void*)0x017EECB8
+  → C-style cast
+  → just forces the compiler to accept it
+  → no type checking, no warnings
+  → can accidentally cast incompatible types silently
+  → considered bad practice in modern C++
+
+my solution:
+  reinterpret_cast<LPCVOID>(0x017EECB8)
+  → C++ style cast
+  → explicit about WHAT you're casting TO (LPCVOID specifically)
+  → compiler can catch mistakes if types are incompatible
+  → code is self-documenting: reader knows exactly
+    what type you intend
+  → correct tool for casting between pointer types
+
+WHY mine IS BETTER:
+  reinterpret_cast is the C++ way.
+  (void*) is the C way.
+  In C++ code, C-style casts are a code smell —
+  they're too permissive and hide potential bugs.
+  reinterpret_cast makes the intent explicit and
+  lets the compiler do more checking.
+
+════════════════════════════════════════════════
+
+FIX 3 — bytes_read TYPE (you caught this too)
+
+Course solution:
+  DWORD bytes_read = 0;
+  → DWORD = 32 bits
+
+David's solution:
+  SIZE_T bytes_read = 0;
+  → SIZE_T = correct type for ReadProcessMemory's last parameter
+  → on 32-bit: SIZE_T = 32 bits (same as DWORD)
+  → on 64-bit: SIZE_T = 64 bits (DWORD would be wrong)
+  → matches the actual function signature exactly
+
+WHY DAVID'S IS BETTER:
+  DWORD works on 32-bit and happened to work here.
+  SIZE_T is what the function actually expects.
+  On a 64-bit process this matters — DWORD would truncate.
+  Always match the type the API actually specifies.
+
+════════════════════════════════════════════════
+
+FINAL CODE COMPARISON
+
+Course (works but shortcuts):
+  FindWindow(NULL, L"...")          ← hardcoded wide string
+  (void*)0x017EECB8                 ← C-style cast
+  DWORD bytes_read = 0              ← wrong type technically
+
+David (correct C++ practice):
+  #include <tchar.h>
+  FindWindow(NULL, _T("..."))       ← portable string macro
+  reinterpret_cast<LPCVOID>(...)    ← explicit C++ cast
+  SIZE_T bytes_read = 0             ← correct type from signature
+
+════════════════════════════════════════════════
+```
+### Debugging
+- We use Cheat engine to compare the values of the address `0x017EED18` and our `gold_value` variable to see if we are reading the correct value
+
+> Make sure you put a breakpoint on the ==ReadProcessMemory== and then hit the `Local Windows Debugger` button, then hit `F10` and check the debugger
+
+### DMA
+- We have already determined the gold address `[[0x017EED18] + 0xA90] + 4`.
+- To retrieve the gold address in our program, we can first read the value at `0x017EED18`, then add `0xA90` to that value. We can then read this address and add 4 to it.
+
+- We use the `ReadProcessMemory` again :
+```cpp
+gold_value += 0xA90;
+ReadProcessMemory(wesnoth_process, reinterpret_cast<LPCVOID>(gold_value), &gold_value, 4, &bytes_read);
+```
+- We can use Cheat engine to verify again, then we add :
+	- `gold_value += 4;` 
+
+### Writing Memory
+- The API to write to another process’s memory is called [WriteProcessMemory.](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-writeprocessmemory) Its definition is very similar to **ReadProcessMemory**:
+```cpp
+BOOL WriteProcessMemory(
+    HANDLE  hProcess,
+    LPVOID  lpBaseAddress,
+    LPCVOID lpBuffer,
+    SIZE_T  nSize,
+    SIZE_T  *lpNumberOfBytesWritten
+);
+```
+
+> The major difference is that this function writes the value of a buffer into a section of a memory, instead of reading a section of memory into a buffer.
+
+- First we declare two variables for the buffer and the number of bytes written :
+```cpp
+DWORD new_gold_value = 555;
+SIZE_T bytes_written = 0;
+```
+
+- Then, we can call ==**WriteProcessMemory**== in an almost identical manner to ==**ReadProcessMemory**==. We again add the `reinterpret_cast<LPVOID>` but this time ==LPVOID== 
+```cpp
+WriteProcessMemory(wesnoth_process, reinterpret_cast<LPVOID>(gold_value), &new_gold_value, 4, &bytes_written);
+```
+- That's it you can find the full code in my [Github]()
