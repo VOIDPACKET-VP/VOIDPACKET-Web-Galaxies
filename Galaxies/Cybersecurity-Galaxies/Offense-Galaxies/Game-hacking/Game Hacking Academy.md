@@ -965,3 +965,232 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	
 }
 ```
+
+### Injecting DLL's
+```
+DLL Injection
+
+════════════════════════════════════════════════
+
+WHAT IS DLL INJECTION?
+────────────────────────
+Normally a program loads a DLL using LoadLibrary API inside its own code.
+But since we're not modifying Wesnoth's source code we need to force our DLL into the process from outside. This is called DLL injection.
+
+════════════════════════════════════════════════
+
+METHOD 1 — DLL INJECTOR (the proper way)
+──────────────────────────────────────────
+An external program that:
+1. Creates a thread INSIDE the target process
+   using CreateRemoteThread API
+2. That thread calls LoadLibrary inside the process
+3. Our DLL gets loaded
+
+→ Covered in the DLL Injector lesson later
+
+════════════════════════════════════════════════
+
+METHOD 2 — AppInit_DLLs (what we use in this lesson)
+──────────────────────────────────────────────────────
+A Windows feature that automatically injects
+any DLL you specify into EVERY process that starts.
+Controlled via the Windows Registry.
+
+Important limitations:
+→ Windows 10 and below ONLY
+→ Requires Secure Boot to be DISABLED
+   (VirtualBox disables it by default — fine for VMs)
+   (real hardware → disable in BIOS)
+→ Windows flags this because malware loves it
+
+════════════════════════════════════════════════
+
+SETTING IT UP — REGISTRY CHANGES
+──────────────────────────────────
+Open regedit and navigate to:
+Computer\HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\
+Microsoft\Windows NT\CurrentVersion\Windows
+
+Two values to change:
+
+1. AppInit_DLLs
+   → set value = full path to your DLL
+   → Windows will inject this DLL into every new process
+
+2. LoadAppInit_DLLs
+   → set to 1 = ENABLED
+   → set to 0 = DISABLED
+
+After making these changes:
+start Wesnoth → message boxes appear
+→ confirms DLL was injected and is loading/unloading ✅
+
+════════════════════════════════════════════════
+
+CRITICAL WORKFLOW RULE
+───────────────────────
+AppInit_DLLs injects into EVERY new process.
+Including the build process when you recompile your DLL.
+This will cause conflicts and issues.
+
+Correct workflow every time you make changes:
+
+  1. Set LoadAppInit_DLLs → 0  (disable)
+  2. Build/recompile your DLL
+  3. Set LoadAppInit_DLLs → 1  (re-enable)
+  4. Start Wesnoth to test
+
+Never build while injection is enabled.
+
+════════════════════════════════════════════════
+
+CONNECTION TO MALWARE DEV
+──────────────────────────
+AppInit_DLLs is a classic malware persistence technique.
+Malware sets its DLL path in AppInit_DLLs
+→ gets injected into every process automatically on startup
+→ survives reboots via registry
+```
+
+### Creating Threads
+- We want our DLL to wait for a key press before changing the gold, and to do this we need to create a ==Thread== in the ==Wesnoth process== 
+
+> The Thread will run until the game is exited
+
+- Before we create it we need to make sure that our ==DLLMain== only execute our code when our DLL is first loaded into the process, which will ensure that only One Thread is created
+	- We do this by checking the ==fdwReason== param:
+```cpp
+BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        // Code to execute when the process is loaded
+    }
+
+    return true;
+}
+```
+
+- Now, to create Threads in a process, we use the [CreateThread](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createthread) API, it's definition is :
+```cpp
+HANDLE CreateThread(
+    LPSECURITY_ATTRIBUTES   lpThreadAttributes,
+    SIZE_T                  dwStackSize,
+    LPTHREAD_START_ROUTINE  lpStartAddress,
+    __drv_aliasesMem LPVOID lpParameter,
+    DWORD                   dwCreationFlags,
+    LPDWORD                 lpThreadId
+);
+```
+
+ > Since we're creating a ==Thread== within Wesnoth with no special attributes, we can ignore most of these parameters. The only parameter we are concerned with is **==lpStartAddress==** , which represents *the function we want to execute when the thread is started.* 
+ 
+ - That function doesn't have to return anything, so it will be of type ==void==
+```cpp
+void injected_thread() {
+
+}
+
+BOOL WINAPI DLLMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+	if (fdwReason == DLL_PROCESS_ATTACH) {
+		CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(injected_thread),, NULL, 0, NULL);
+	}
+	
+	return TRUE;
+}
+```
+
+- When loaded, this code will create a thread that will execute the ==**injected_thread**== function and then exit. To ensure that our thread remains active, we will use an infinite **while** loop in our ==**injected_thread**== function:
+
+```cpp
+while (true) {
+    Sleep(1);
+}
+```
+
+- This while loop will run until our thread is exited by the closure of the game. To prevent our thread from causing slowdowns, we can use the **Sleep** API to pause its execution for a millisecond.
+
+### Detecting Key Presses
+- We can use the [GetAsyncKeyState](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate) API, it takes a single param:
+	- the key to check for
+
+> If the key is down, it will return true. Otherwise, it will return false
+
+- Our function code will be :
+```cpp
+while (true) {
+    if (GetAsyncKeyState('M')) {
+        // Change the player's gold
+    }
+
+    Sleep(1);
+}
+```
+
+> Note that **GetAsyncKeyState** will constantly return true if the key is held down. So if we want to toggle a value off and on in the future, we will need to account for this behavior.
+
+### Pointers
+```
+WHY POINTERS INSTEAD OF ReadProcessMemory?
+────────────────────────────────────────────
+In the external hack, we used ReadProcessMemory/WriteProcessMemory
+because our program was OUTSIDE Wesnoth.
+
+Now our DLL is INJECTED into Wesnoth.
+We share the same memory space as the game.
+So we can access memory directly using pointers —
+no need for ReadProcessMemory at all.
+Same addresses and offsets as before, cleaner access.
+
+════════════════════════════════════════════════
+
+READING THE POINTER CHAIN
+───────────────────────────
+Remember our chain from the DMA lesson:
+[[0x017EED18] + 0xA90] + 4 = gold address
+
+Step 1 — get player base:
+   DWORD* player_base = (DWORD*)0x017EED18;
+   → declare a pointer that points to address 0x017EED18
+   → *player_base = the value stored there (player class address)
+
+Step 2 — get game base:
+   DWORD* game_base = (DWORD*)(*player_base + 0xA90);
+   → dereference player_base to get the player class address
+   → add offset 0xA90 to reach the game object
+   → game_base now points to the game object
+
+Step 3 — get gold and change it:
+   DWORD* gold = (DWORD*)(*game_base + 4);
+   *gold = 999;
+   → dereference game_base + offset 4 = gold address
+   → dereference gold pointer and SET the value to 999
+   → gold is now 999 in the game ✅
+
+════════════════════════════════════════════════
+
+HOW IT READS IN PLAIN ENGLISH
+───────────────────────────────
+   "Go to address 0x017EED18,
+    read what's there (player base),
+    add 0xA90 to get to the game object,
+    read what's there (game base),
+    add 4 to get to gold,
+    write 999 there."
+
+Same chain we built by reversing.
+Now expressed purely in C++ pointers.
+
+════════════════════════════════════════════════
+
+TRIGGER — HOW THE HACK ACTIVATES
+──────────────────────────────────
+The hack is triggered by pressing M in game
+(from the GetAsyncKeyState code in the thread).
+After pressing M and moving the camera,
+gold updates to 999 ✅
+```
+
+> Make sure you ==build the DLL== then set ==LoadAppInit_DLLs to 1== then fire up the game
+
+## Code Cave & DLL's
+
