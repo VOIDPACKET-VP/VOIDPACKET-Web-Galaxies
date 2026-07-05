@@ -1193,4 +1193,137 @@ gold updates to 999 ✅
 > Make sure you ==build the DLL== then set ==LoadAppInit_DLLs to 1== then fire up the game
 
 ## Code Cave & DLL's
+- To create a ==code cave== inside a ==DLL==, we need to :
+	1. Create a code cave in our DLL
+	2. Modify the ==opcodes== in the Terrain Description to ==jmp== to this code cave inside our DLL
 
+### Assembly in C++
+- C++ allows us to insert ==assembly== in a ==C++ source file==, to do this we use the ==`__asm` keyword== :
+```cpp
+__asm {
+	pushad
+}
+```
+
+> This assembly will not be modified during the compiling steps
+
+- We can also mix C++ and assembly in a function :
+```cpp
+// the following code will save all registers, create a variable **x**, add 1 to it, and then restore all registers:
+
+__asm {
+	pushad
+}
+
+int x = 0;
+x += 1;
+
+__asm {
+	popad
+}
+```
+
+> Variables declared in C++ can be referenced in these assembly blocks. ==We will use this behavior to program our hack, SO REMEMBER IT==
+
+### Assembled Functions
+- Since we need to jump to our code cave we need to know it's location, the easiest way to do this in C++ is by declaring our ==code cave=== as a ==function==. Then we can use the ==&== to retrieve its address
+
+- However due to how functions get assembled :
+	- A stack frame is created which adds extra instructions, which can corrupt our game when we jump into our code cave
+```assembly
+codecave:
+    push ebp
+    mov ebp, esp
+    ...
+    mov esp, ebp
+    pop ebp
+    ret
+```
+We use the ==`__declspec` keyword== combined with the ==`naked` keyword== which makes ==the compiler not add a stack frame==
+
+> ==Stack frames== allow the compiler to easily ==offset and compute== the location of ==local variables== and ==function arguments==
+
+### Cave Skeleton
+- Alright, now lets' begin creating our code cave:
+	- Create a DLL in Visual Studio
+	- Add our function :
+```cpp
+__declspec(naked) void codecave() {
+	
+}
+```
+
+- As we discussed, the first step when creating a code cave is to ==save and restore the registers== and then ==restore the overwritten instructions== :
+```assembly
+pushad
+/// HACK GOES HERE ///
+popad
+mov eax, dword ptr ds:[ecx]
+lea esi,dword ptr ds:[esi]
+jmp 0xCCAF90
+```
+
+- In our DLL, we'll create 2 separate blocks of assembly :
+	1. Save all the registers
+	2. Restore the registers and then execute the original instructions we have overwritten
+
+```cpp
+__asm {
+    pushad
+}
+
+// code to modify gold
+
+__asm {
+    popad
+    mov eax, dword ptr ds:[ecx]
+    lea esi,dword ptr ds:[esi]
+    jmp 0xCCAF90
+}
+```
+
+> We cannot jump directly to a ==static address== because the compiler does not know the jump's length or how to encode the instruction, resulting in a compilation error. To fix this, we must ==store the static address inside a variable== so the compiler can resolve it. Because this code runs inside a ==code cave with no stack frame==, you ==cannot declare local variables== and must instead ==declare the address as a global== `DWORD` variable 
+
+- So right now our code will look like this :
+```cpp
+#include <Windows.h>
+
+DWORD ret_address = 0xCCAF90;
+
+__declspec(naked) void codecave() {
+    __asm {
+        pushad
+    }
+
+    // OUR HACK GOES HERE
+
+    __asm {
+        popad
+        mov eax, dword ptr ds:[ecx]
+        lea esi,dword ptr ds:[esi]
+        jmp ret_address
+    }
+}
+```
+
+### Changing Gold
+- We can now use the same approach in ==DLL Memory Hack== :
+```cpp
+// As Global Variables :
+DWORD* player_base;
+DWORD* game_base;
+DWORD* gold;
+
+// Inside our code cave :
+player_base = (DWORD*)0x017EED18;
+game_base = (DWORD*)(*player_base + 0xA90);
+gold = (DWORD*)(*game_base + 4);
+*gold = 888;
+```
+
+### Redirection
+- To redirect the game's code to our function, we will use an ==unsigned char== pointer targeted at the original hooking location (`0x00CCAF8A`) because this ==type represents 1 byte==, giving you the flexibility to modify individual bytes of game data. Before writing to this code address, we must use the ==VirtualProtect Windows API== to change its default execution-only protection status, which normally blocks outside processes or DLLs from writing data. The modification requires inserting a ==jmp== instruction, which begins with the ==0xE9 opcode== followed by ==4 bytes== that determine the destination. These 4 bytes are not the direct target address but are calculated using ==the formula `new_location - original_location + 5`==.
+
+> Due to ==Endianness== on Windows-compatible CPUs, the resulting calculated value must be ==written into memory== in ==reverse byte order== to match how the CPU reads the opcode
+
+#### Redirection Function
