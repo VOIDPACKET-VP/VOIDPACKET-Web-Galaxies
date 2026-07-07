@@ -1327,3 +1327,54 @@ gold = (DWORD*)(*game_base + 4);
 > Due to ==Endianness== on Windows-compatible CPUs, the resulting calculated value must be ==written into memory== in ==reverse byte order== to match how the CPU reads the opcode
 
 #### Redirection Function
+- We'll handle the redirection in the ==DLLMain== function, but first we need to :
+	- ==Declare a pointer== to our hook location
+	- ==**VirtualProtect** API== requires a parameter to hold the previous protection type. ==We will declare that as well==:
+```cpp
+DWORD old_protect;
+unsigned char* hook_location = ( unsigned char* )0x00CCAF8A;
+```
+
+- Next we will change the ==Protection Type== for our ==hook location==, and similar to what we did in the Last code cave lesson, we will need to ==rewrite 6 bytes==
+
+> ==**VirtualProtect** API== has similar parameters to the ==**ReadProcessMemory**== and ==**WriteProcessMemory**== API’s.
+
+```cpp
+if (fdwReason == DLL_PROCESS_ATTACH) {
+    VirtualProtect((void*)hook_location, 6, PAGE_EXECUTE_READWRITE, &old_protect);
+    // REDIRECTION CODE GOES HERE
+}
+
+return true;
+```
+
+- To write a relative jump (`JMP`) hook to a code cave, we first set the initial byte at the target location to `0xE9` (the JMP opcode) 
+```cpp
+*hook_location = 0xE9;
+```
+- Then calculate the 4-byte destination offset using the formula we tested before : ==new_location - original_location + 5==
+```cpp
+*(hook_location + 1) = &codecave - (hook_location + 5);
+```
+- But because the location pointer is originally defined as a ==1-byte `unsigned char`==, we must explicitly cast it to a ==4-byte `DWORD*` pointer== so the compiler writes the full offset instead of cutting it off, also cast the other variables to ==**DWORD**’s==
+```cpp
+*(DWORD*)(hook_location + 1) = (DWORD)&codecave - ((DWORD)hook_location + 5);
+```
+- Finally, just like we did in the previous lesson, we need to make the ==sixth byte a **nop** (index 5)== to cleanly pad out the remaining space from the original instruction.
+```cpp
+*(hook_location + 5) = 0x90;
+```
+- Once these memory modifications are complete, the DLL can be built and injected into the game, where selecting any tile's Terrain Description will successfully trigger the hook and set your gold value to 888.
+
+- You can Check the Full code [here](https://github.com/VOIDPACKET-VP/voidPacketProjects/blob/main/CyberProjects/GameHacks/wesnoth_code_cave_DLL_hack.cpp) 
+
+## Printing Text
+- Our goal here is to ==print our own text in Wesnoth==, we will do that by locating a section of code responsible for printing text, then use a code cave to modify the game's memory to display our text
+
+- ==NOTE== : There are multiple approaches to print our own text >
+	1. Use an external overlay.
+	2. Create a code cave inside the game’s main display loop and call the function responsible for displaying text.
+	3. Create a code cave inside a function responsible for displaying text and modify the text about to be displayed.
+- Here we'll use the third option cause it's the easiest in Wesnoth
+
+### Locating Text
