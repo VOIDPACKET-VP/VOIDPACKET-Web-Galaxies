@@ -1378,3 +1378,44 @@ return true;
 - Here we'll use the third option cause it's the easiest in Wesnoth
 
 ### Locating Text
+- We need to locate the game’s code that is responsible for displaying text, so obviously the first thing to do is to ==find a string of letters that appears in the game==
+	- For this example we'll use the _Terrain Description_ text, specifically the description for the _Ford_ tile
+
+- So select a map that has _Ford_ tiles on it (e.g. _Den of Onis_)
+- We can use Cheat Engine to find the TEXT's address like we always do.
+
+> To narrow down which address represents the string we are interested in, change the first letter of every string. After changing these values, go back into Wesnoth and examine the terrain description again.
+
+### Locating PrintText
+- We do know that the print text function must access this text in some way to print it, so we ==set a breakpoint on a byte== of the text :
+	1. Select and right click One Byte in the `Dump` section
+	2. Breakpoint > Hardware, Access > Byte
+- Now if we go back into Wesnoth and invoke the _Terrain Description_ action again our ==breakpoint will pop== immediately:
+	- We see that the instruction it popped into is :
+		- ==`rep movsb`== : loop responsible for moving each byte (of text) into a buffer
+- Now we need to navigate to the code that called this lower-level code, which we can do by using :
+	1. ==Execute until return== Button
+	2. ==Step over== Button
+
+- If we continue execution (==run== button), we notice that this code is called multiple times for each section of the terrain description box.
+- To find the function's parameters, we set a breakpoint at `0x005ED114` and trigger the _Terrain Description_ action. The program loads the text into the `edx` register and then copies it to the memory location held by `esp`. This process places the data onto the top of the stack
+
+> ==REMEMBER== : a Stack is a temporary storage area, and functions routinely retrieve data to run their code from it 
+
+### Memory and Endianness
+
+
+
+
+
+# RTS/RPG Hacks
+## Stathack
+- A ==Stathack==, also known as ==statistic hack== is a  type of hack that displays information to us about other players, such as their gold or number of units
+
+> Our goal in this lesson is to display the gold of the second player
+
+- Now to do this we need to accomplish ==2 steps== :
+	1. Find the second player’s gold.
+	2. Print this value to the screen.
+
+### Second Player's Gold
