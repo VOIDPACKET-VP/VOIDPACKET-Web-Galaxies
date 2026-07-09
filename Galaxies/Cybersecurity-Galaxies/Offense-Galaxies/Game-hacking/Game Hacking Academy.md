@@ -1398,15 +1398,36 @@ return true;
 	2. ==Step over== Button
 
 - If we continue execution (==run== button), we notice that this code is called multiple times for each section of the terrain description box.
-- To find the function's parameters, we set a breakpoint at `0x005ED114` and trigger the _Terrain Description_ action. The program loads the text into the `edx` register and then copies it to the memory location held by `esp`. This process places the data onto the top of the stack
+- To find the function's parameters, we set a breakpoint at `0x005ED114` and trigger the _Terrain Description_ action. The program ==loads the text into the `edx`== register and then ==copies it to the memory location held by `esp`==. This process places the data onto the top of the stack
 
 > ==REMEMBER== : a Stack is a temporary storage area, and functions routinely retrieve data to run their code from it 
 
 ### Memory and Endianness
+- To locate our dynamically allocated text string, we must first ==invoke the Terrain Description== action to trigger our breakpoint, ==right-click the `edx`== register value, and ==select Follow in Dump== to view the raw memory bytes.
 
+>Even though Cheat Engine and the dump share the same data, the bytes at `edx` initially look "reversed" because Windows CPUs use little-endian format, meaning the least-significant byte is stored first at the lowest memory address.
 
+- Once we recognize that this reversed value is actually the pointer we need, we ==select all those bytes== and ==click Follow in Dump a second time== to finally arrive at our string's true location. To safely reference and use this dynamic memory location in our assembly code cave, we use the
+	- `mov eax, dword ptr ds:[edx]` instruction to load that pointer into the `eax` register, allowing us to read the individual bytes of the text.
 
+### Changing Text
+- To verify we have the correct method, we will create ==a 5-byte code cave== at `0x01343E1B` by replacing the call at `0x005ED129` with a jump to our redirection point.
 
+> Remember : the **call** at `0x005ED129` is responsible for printing the text and is also 5 bytes long, we will use it as our redirection point.
+> And any location near the end of program’s memory will work for our cave location.
+
+- Inside our cave, we will first ==save the registers==, use the ==`ptr ds` keyword to load the text value from `edx` into `eax`==, and then use the ==`inc` operator to increase the value of the first byte of the string== (changing an 'A' to a 'B', for example). Finally, we will ==restore the registers==, ==recreate the original call==, and ==jump back to the original code== :
+
+```assembly
+pushad
+mov eax, dword ptr ds:[edx]
+inc byte ptr ds:[eax]
+popad
+call wesnoth.5E9630
+jmp wesnoth.5ED12E
+```
+
+- allowing us to go into Wesnoth and invoke the Terrain Description action multiple times to confirm the text changes and our hack works.
 
 # RTS/RPG Hacks
 ## Stathack
