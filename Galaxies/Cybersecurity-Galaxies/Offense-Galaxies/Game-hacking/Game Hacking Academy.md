@@ -1440,3 +1440,23 @@ jmp wesnoth.5ED12E
 	2. Print this value to the screen.
 
 ### Second Player's Gold
+- In the ==Game Fundamentals lesson== we learned that games often store similar data and classes in arrays that get iterated over to locate and update values, and although it's unconfirmed whether Wesnoth uses this pattern, we can apply it as a model to try to find the second player's gold value
+- Building on the ==Defeating DMA lesson==, where we determined that the game dynamically allocates player classes from a base pointer and identified both the game's base pointer and the first player's base pointer, we can now closely re-examine that same code to check whether the game stores player classes in an array and, if so, pinpoint the second player's base pointer
+- To do this :
+	1. set up a local game with two local players, ensure both receive income each turn, 
+	2. start the game, attach x64dbg
+	3. play one full turn per player so any first-turn initialization code runs
+	4. then set a breakpoint at ==0x9B4CE3== (the same call identified previously)
+	5. finally end the first player's second turn in Wesnoth, at which point the breakpoint should trigger.
+
+![[Pasted image 20260711190329.png]]
+- The value in ==EBX== indicates that this function is invoked for every player each turn, we also know that the value of ==ECX== is the game's base pointer :
+	- ==This allows us to assume that the game has an array of player classes.==
+- Our next step is to ==determine the size of each player== entry in the array, since the game needs this to advance to the next player, so we ==step into the call at 0x9B4CE3== and trace through it line by line, noting that most of the addresses and values match what we saw when locating the first player's gold address, except near the end where an ==`imul` (signed multiply)== instruction appears—when stepping through as the ==first player `edx` is 0==, but as the ==second player `edx` is 1==, indicating the game uses ==`edx` as a player offset multiplied by 0x270==, with that result then ==added to `eax`== to produce the current player's gold address; using the same base offset technique as before, `[[0x017EED18] + 0xA90]` gets us the game's base pointer, and while ==adding 4 gives the first player's gold address==, ==adding 0x270 + 4 (0x274) gives the second player's gold address==, which we can confirm in Cheat Engine, and finally we update our existing code to use 0x274 instead, as shown: 
+```cpp
+player_base = (DWORD*)0x017EED18;
+game_base = (DWORD*)(*player_base + 0xA90);
+gold = (DWORD*)(*game_base + 0x274);
+```
+
+### Printing Value
