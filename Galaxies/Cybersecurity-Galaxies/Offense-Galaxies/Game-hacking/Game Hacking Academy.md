@@ -200,12 +200,10 @@ Key concepts:
 - This one is hard so pay attention
 ### Goal
 Recruit units anywhere on the map, not just specific tiles.
-
 ### The Problem
 We want to modify the right-click context menu so that
 selecting "Terrain Description" calls the debug spawn menu instead.
 But we don't know WHERE in the code the context menu is handled.
-
 ### The Strategy — Bubbling Up
 We already know ONE location deep in the call stack:
 the gold subtraction code from the previous hack.
@@ -227,7 +225,6 @@ We climb from the bottom to the top, one function at a time.
 ---
 
 ### Key Concepts
-
 #### Call and Return in Assembly
 When a function is called in assembly:
 - `call some_address` → jumps INTO the function
@@ -237,37 +234,23 @@ When a function is called in assembly:
   by popping that return address off the stack
 
 This is how the CPU knows where to go after a function finishes.
-
 #### Step Into vs Step Over
-Two ways to move through code in x64dbg:
-
-- **Step Into** → if the current instruction is a `call`,
+Two ways to move through code in ==x64dbg==:
+- ==**Step Into**== → if the current instruction is a `call`,
   follow it and enter the function
-- **Step Over** → if the current instruction is a `call`,
+- ==**Step Over**== → if the current instruction is a `call`,
   execute the whole function and land on the next line
   without going inside it
 
 Step Over is used when you don't care about a function's internals
 and just want to move past it quickly.
-
 #### Execute Till Return
-A feature in x64dbg that runs the program
-until the next `retn` instruction is hit.
-Used to fast-forward to the end of the current function
-so you can then Step Over the return and land in the caller.
+A feature in x64dbg that runs the program until the next `retn` instruction is hit. Used to fast-forward to the end of the current function so you can then Step Over the return and land in the caller.
 
 ---
-
 ### The Bubbling Up Workflow
-
 #### Why look ABOVE the breakpoint pop location?
-Code runs top to bottom.
-If our breakpoint popped on instruction X,
-everything ABOVE X already ran.
-Everything below X hasn't run yet.
-So to find where a register was set,
-we always look ABOVE where we currently are.
-
+Code runs top to bottom. If our breakpoint popped on instruction X, everything ABOVE X already ran. Everything below X hasn't run yet. So to find where a register was set, we always look ABOVE where we currently are.
 #### Why follow a specific register and not just any register?
 We only follow the register that appears
 in the instruction we care about.
@@ -285,9 +268,7 @@ and follow only that one backwards.
 6. Keep going until the code pattern changes to something that looks like branching
 
 ---
-
 ### Recognizing the Context Menu Function
-
 #### What to look for
 A switch-like structure in assembly looks like this:
 ```asm
@@ -299,7 +280,6 @@ call dword ptr ds:[eax+0x??]
 jmp  to_end
 ```
 Multiple calls followed by jumps = branching = menu handler.
-
 #### How to verify you found the right function
 1. NOP out the call you just stepped out of
 2. Go back into the game and try to recruit a unit
@@ -307,10 +287,9 @@ Multiple calls followed by jumps = branching = menu handler.
 4. Go back to x64dbg → right-click → **Restore selection** → undo the NOP
 5. Now make your real change
 
-The NOP test is how you CONFIRM a location before committing to a change.
+> The NOP test is how you CONFIRM a location before committing to a change.
 
 ---
-
 ### The Big Discovery — Function Pointer Arrays
 
 The game doesn't use a switch statement like we assumed.
@@ -338,7 +317,6 @@ call dword ptr ds:[eax + 0x68]   ; debug spawn menu
 Each offset is a multiple of 4 because function pointers
 are 4 bytes wide (32-bit).
 The offset = which slot in the array = which menu action.
-
 #### How we found the offsets
 We already knew recruit = `0x54` from bubbling up.
 We then changed `0x54` to other multiples of 4
@@ -346,10 +324,9 @@ and observed what happened in game:
 - `0x28` → terrain description appeared
 - `0x68` → debug spawn menu appeared
 
-This is brute-force offset exploration — try values, observe results.
+> This is brute-force offset exploration — try values, observe results.
 
 ---
-
 ### The Hack
 
 **What we changed:**
@@ -365,7 +342,6 @@ we can now spawn units from any tile on the map.
 **Result:**
 Select any tile → right-click → Terrain Description
 → Debug spawn menu opens → place any unit anywhere ✅
-
 ### Important Note on Code Addresses
 - Unlike variable addresses (which change every restart due to DMA),**code addresses are constant**.
 - The gold subtraction code will always be at `0x007ccd9e`. This is why we can reuse the same address across sessions when working with code instead of data.
@@ -421,8 +397,8 @@ Result: selecting terrain description now
 
 > Key rule: only modify what you need, never leave registers in a different state than you found them
 
+```
 ### Code cave example :
-
 ```
 Code Caves — Real Example (Wesnoth Gold Hack)
 
@@ -680,6 +656,7 @@ you're essentially reverse engineering how the game
 navigates its own memory — 
 the same thing it does with LEA and MOV instructions.
 ```
+
 ### Defeating DMA
 - EXAMPLE
 - This one is fun tbh
