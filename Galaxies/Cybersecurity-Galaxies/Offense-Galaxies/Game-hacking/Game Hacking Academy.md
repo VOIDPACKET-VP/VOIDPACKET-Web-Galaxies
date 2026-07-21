@@ -715,7 +715,7 @@ There are three main types of game hacks that can be programmed. These are:
 
 ## External Memory Hack
 
-- So we will be using the Windows API to make our hacks, so we need to include the header for the windows API: 
+- We'll be using the Windows API to make our hacks, so we need to include the header for the windows API: 
 	- `#include <Windows.h>`
 
 ### Reading values
@@ -827,7 +827,7 @@ DWORD GetWindowThreadProcessId(
 - And to get a ==Window handle== we use the API called [FindWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-findwindowa) 
 	- This function takes the name of a window title and returns a handle to the window. The definition is:
 ```cpp
-HWND FindWindowA(
+HWND FindWindow(
     LPCSTR lpClassName,
     LPCSTR lpWindowName
 );
@@ -1187,7 +1187,7 @@ void injected_thread() {
 
 BOOL WINAPI DLLMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 	if (fdwReason == DLL_PROCESS_ATTACH) {
-		CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(injected_thread),, NULL, 0, NULL);
+		CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(injected_thread), NULL, 0, NULL);
 	}
 	
 	return TRUE;

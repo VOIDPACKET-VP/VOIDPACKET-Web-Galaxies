@@ -258,3 +258,10 @@ What is the offset to 10ca1e ?
 - EXAMPLE :
 	- `add rsp, 8` => `rsp = rsp + 8` 
 
+## Local Variables
+### Single Local Variables
+- So things to take away are :
+	- Local variables are allocated on the stack within the function where the variable is scoped to
+	- Visual studio is over allocating space for single local variables, and that's because it needs to keep things ==16 byte alligned==, more [here](https://docs.microsoft.com/en-us/cpp/build/stack-usage?view=msvc-160)
+
+### Array Local Variables

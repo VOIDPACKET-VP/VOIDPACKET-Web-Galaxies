@@ -974,3 +974,75 @@ void Function() {
 - [Watch this video by The Cherno](https://youtu.be/Wt4dxDNmDA8?si=h_TeNXhcd9A7o_OH)
 
 # How to deal with Multiple return values
+- It's best to use a `struct`, and make your function of type ==that struct==, for more watch [this](https://youtu.be/3cm0VckC8q0?si=dZcBZZKv6HQNjYbv) : it's at the end of the video
+
+# Templates
+- It's basically the compiler writing code for you based on a set of rules (code) you gave it, it's like a blueprint
+- Let's imagine a case where you want to print something, the function will take a param (what to print), now normally we'll have to duplicate that function for every data type we want to print, but with templates we don't :
+```c++
+// Syntax
+template<typename T>
+void Print(T value){
+	std::cout << value << std::endl;
+}
+
+int main() {
+	Print<int>(5); // we either specify the type explecitly 
+	Print(5.0f); // or implicitly
+
+}
+```
+- One cool thing is that the `Print` function doesn't actually exist until it's called
+
+> This can also ==be a bad thing==, cause if you have a syntax error in your template and you haven't called it yet, and you compile your code, it will compile just fine ==with no errors==
+
+You can use them for ==functions== and ==classes==
+## Function Templates
+- Function templates define a structural pattern for a function. The compiler automatically evaluates the arguments you pass and generates an overloaded version of that function behind the scenes.
+
+## Class Templates
+- Class templates allow containers, arrays, and data structures to remain completely agnostic of the data types they hold. This architecture underpins the entire C++ Standard Template Library (STL), powering components like `std::vector` and `std::map`.
+
+
+## Things to remember about templates 
+- **Template Specialization**: If a specific data type requires entirely unique, custom structural rules or behavior, you can override the general template with a target version tailored specifically to that type.
+
+- **Keywords**: The keywords `typename` and `class` are completely interchangeable when declaring a placeholder type inside a template's parameter list (`<typename T>` is structurally identical to `<class T>`)
+
+- **Non-Type Parameters**: Templates are not restricted to handling data types. You can also pass fixed constant values (like raw integers) directly to them at compile time to define fixed parameters
+### When to use and when not to use
+- Don't Get crazy with Templates 
+- Use for Logging systems, material systems (graphics) etc.
+
+- Read more [here](https://www.geeksforgeeks.org/cpp/templates-cpp/)
+# Stack vs Heap Memory in C++
+- They are both memory space located in RAM, the Stack's size is predefined : around 2mb, and the heap is also predefined but it can grow
+- How to allocate on the heap vs on the stack:
+```cpp
+struct Vector3 {
+	float x, y, z;
+};
+
+int main() {
+	int value = 5; // Stack
+	int* hValue = new int; // Heap
+	*hValue= 5; 
+	
+	int array[5]; // Stack
+	int* hArray = new int[5]; // Heap
+	
+	Vector3 vector; // Stack
+	Vector3* hVector = new Vector3(); // Heap
+	
+	// We have to free our memory when using the 'new' keyword
+	// But if we used smart pointers they do that for us
+	delete hValue;
+	delete hArray[];
+	delete hVector;
+}
+```
+
+> The big difference is allocation, The stack is just one assembly instructions, the Heap is a whole world
+
+
+# Macros
