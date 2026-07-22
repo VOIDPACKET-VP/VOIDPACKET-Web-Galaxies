@@ -265,3 +265,66 @@ What is the offset to 10ca1e ?
 	- Visual studio is over allocating space for single local variables, and that's because it needs to keep things ==16 byte alligned==, more [here](https://docs.microsoft.com/en-us/cpp/build/stack-usage?view=msvc-160)
 
 ### Array Local Variables
+- So when working with Arrays we get some new assembly instructions added :
+	- `imul`, `movsx` and `movzx`
+
+#### imul
+- Stands for : ==signed multiply== 
+> Quick note : ==Visual Studio== prefers `imul` over `mul` (unsigned multiply), so sometimes you'll see `imul` in places where you expect `mul`
+- `imul` takes 3 forms :
+	1. `imul r/mX` > the most complicated
+	2. `imul reg, r/mX` > multiply `r/mX` by `reg` and stores the result in `reg` : typical instruction
+	3. `imul reg, r/mX, immediate` > multiply `r/mX` by `immediate` and stores the result in `reg`
+
+- The reason why the first form (one operand) is the most complicated because it relies on ==**implicit operands**==. Instead of explicitly naming where the answer goes, it ==secretly hardcodes the accumulator (e.g., `EAX`) to hold one factor==, and ==automatically splits the double-sized result across two registers== (e.g., `EDX` and `EAX`) to prevent overflow.
+
+1. ==Implicit Multiplicand== (The "Hidden" Input)
+	- You only provide one operand, but the CPU needs two to multiply. It automatically assumes the first operand is already waiting in your A-register:
+	- **8-bit:** `AL`
+	- **16-bit:** `AX`
+	- **32-bit:** `EAX`
+	- **64-bit:** `RAX` 
+
+2. ==Double-Width Result== (The Output)
+- Multiplying two numbers requires double the space so you don't lose data (\(N \times N = 2N\)). The single-operand `IMUL` stores the product across a pair of registers:
+	- **8-bit x 8-bit:** 16-bit result goes into `AX`.
+	- **32-bit x 32-bit:** 64-bit result. The lower 32 bits go to `EAX`, and the upper 32 bits go to `EDX` (written as `EDX:EAX`)
+
+![[Screenshot 2026-07-22 180146.png]]
+![[Screenshot 2026-07-22 180447.png]]
+![[Screenshot 2026-07-22 180501.png]]
+![[Screenshot 2026-07-22 180627.png]]
+![[Screenshot 2026-07-22 180640.png]]
+
+> By ==sign-extend== we mean : making a short binary number longer by filling the empty space on the left with a copy of its furthest-left bit (the sign bit). In assembly instructions like `imul`, the processor does this to make a short number match the larger size of a register without changing its actual value. If the number is positive, the processor pads the left side with zeros; if it is negative, it pads it with ones, ensuring that the number's mathematical value and positive or negative sign remain exactly the same.
+
+- Let’s take an example :
+
+	- ==**The Setup**==: You have a 64-bit register `r12` with a value ending in `0x84`, and a 64-bit register `RAX` equal to `0x609966C1A977E177`.
+	- ==**The Meaning of "b"**==: In the assembly instruction `imul r12b`, the suffix **b** stands for **byte**. It tells the CPU to isolate only the lowest 8 bits (1 byte) of `r12`, which is `0x84`.
+	- ==**The Operation**==: The 8-bit `imul` instruction automatically multiplies your chosen byte (`r12b`) by the lowest 8 bits of `RAX`, which is the `AL` register (`0x77`).
+	- ==**Signed vs. Unsigned**==: Because the code uses `imul` (Signed Multiply) instead of `mul` (Unsigned Multiply), the CPU interprets both bytes as signed numbers. `0x77` is read as positive (`+119`), while `0x84` is read as negative (`-124`).
+	- ==**The Result**==: Multiplying \(+119 \times -124\) equals \(-14,756\). In 16-bit hex, this is `0xC65C`. This final result overwrites the lowest 16 bits of `RAX`, changing the end of your register from `0xE177` to `0xC65C`.
+
+> b is the lowest 8 bites
+> w = lowest 16 bites
+> d = lowest 32 bites
+> no suffix means the full register
+
+#### movsx and movzx
+- Stand for : ==Move with sign extend== and ==Move with zero extend==, respectively.
+![[Screenshot 2026-07-22 184601.png]]
+
+> Note there is an instruction called `movsxd` which does the same thing as `movsx` but it extends a 32 bit value to 64 bits
+
+ > `movsx` is technically only sign extends from 8 or 16 bit values
+
+> There is no `movzxd`, hhhhhh
+
+![[Screenshot 2026-07-22 185135.png]]
+
+![[Screenshot 2026-07-22 193428.png]]![[Screenshot 2026-07-22 193441.png]]
+- Something about the second takeaway is : that's why we're multiplying by 1 and later on 4, and if you see the register `RAX`'s value in Visual studio it will hold the size of the array element  
+
+### Struct Local Variable
+- 
